@@ -46,7 +46,7 @@ def vm_create(name,
 
     nics = [{"net-id": nova.networks.find(label=network_name).id,
              "v4-fixed-ip": ''}]
-    print "vm_create: Will create a VM: {0}".format(name)
+    # print "vm_create: Will create a VM: {0}".format(name)
     nova.servers.create(name,
                         image=image,
                         flavor=flavor,
@@ -212,9 +212,10 @@ def main():
     args = parser.parse_args()
     if args.cmd is None:
         args.parse_args(['-h'])
-    elif args.cmd is 'vm_create':
+    elif args.cmd is vm_create:
         args.cmd(args.name, image=args.image, flavor=args.flavor,
                  key_pair=args.key_pair, network_name=args.network_name)
+        print vm_status(args.name)['network'][1]
     else:
         args.cmd(args.name)
 
