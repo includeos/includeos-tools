@@ -7,23 +7,45 @@
 # Runs all tests
 # Stops VM when done
 
-BRANCH=$1	# Dev or master will be specified
-VM_NAME='nightly_build_$BRANCH'
+NAME=$1
+BRANCH=$2	# Dev or master will be specified
+VM_NAME=$1-$BRANCH
 
 # Delete previous VM
+echo Deleting previous VM
 ./openstack_control.py --vm_delete $VM_NAME
 
 # Launch new VM
-./openstack_control.py --vm_create $VM_NAME
+echo Launching new VM
+IP_ADDRESS=`./openstack_control.py --vm_create $VM_NAME`
+echo "IP is : $IP_ADDRESS"
 
 # Install dependencies
-until ssh $IP_ADDRESS 'which git > /dev/null' > /dev/null 2>&1  # Repeats until correct
+echo Installing dependencies
+until ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null 'which arping > /dev/null' > /dev/null 2>&1
 do
-    ssh $IP_ADDRESS 'export PROJECT='"'$PROJECT'"'; sudo sh -c "echo 127.0.1.1 vm-$PROJECT >> /etc/hosts";
-                     sudo apt-get update > /dev/null 2>&1;
-                     sudo apt-get -y install git > /dev/null 2>&1;
-                     sudo apt-get -y install arping > /dev/null 2>&1;
-                     ' > /dev/null 2>&1
-    sleep 2
+ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+    'export PROJECT='"'$VM_NAME'"'; sudo sh -c "echo 127.0.1.1 $PROJECT >> /etc/hosts";
+     sudo apt-get update > /dev/null 2>&1;
+     sudo apt-get -y install git > /dev/null 2>&1;
+     sudo apt-get -y install arping > /dev/null 2>&1;
+     sudo apt-get -y install python-pip > /dev/null 2>&1;
+     sudo pip install --upgrade pip;
+     sudo pip install jsonschema;
+     ' > /dev/null 2>&1
+     sleep 4
 done
+
+# Run all tests
+echo Running tests
+ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+	'git clone https://github.com/hioa-cs/IncludeOS.git;
+	 cd IncludeOS;
+	 git checkout '"'$BRANCH'"';
+	 ./install.sh;
+	 cd test;
+	 python test.py
+	'
+
+
 

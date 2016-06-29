@@ -81,11 +81,12 @@ def vm_create(name,
 def vm_delete(name):
     """ Deletes a VM """
 
-    print "vm_delete: Will delete VM: {0}".format(name)
+    # print "vm_delete: Will delete VM: {0}".format(name)
     try:
         vm_status(name)['server'].delete()
     except TypeError:
-        print "vm_delete: No VM to delete: {0}".format(name)
+        pass
+        # print "vm_delete: No VM to delete: {0}".format(name)
 
     # Will not exit until vm is truely gone
     while True:
@@ -111,7 +112,7 @@ def vm_status(name):
     options = {'name': name}
     server = nova.servers.list(search_opts=options)
     if not server:
-        print "No server found with the name: {0}".format(name)
+        # print "No server found with the name: {0}".format(name)
         return
     server = server[0]
     status_dict['server'] = server
@@ -151,12 +152,10 @@ def vm_stop(name):
 
     vm_info = vm_status(name)
     if vm_info['power_state'] == 1:
-        print "vm_stop: Will stop VM: {0}".format(name)
+        # print "vm_stop: Will stop VM: {0}".format(name)
         vm_info['server'].stop()
         while vm_status(name)['power_state'] == 1:
             time.sleep(1)
-    else:
-        print "vm_stop: {0} is not running".format(name)
     return
 
 
@@ -165,12 +164,10 @@ def vm_start(name):
     """
     vm_info = vm_status(name)
     if vm_info['power_state'] != 1:
-        print "vm_start: Will start VM: {0}".format(name)
+        # print "vm_start: Will start VM: {0}".format(name)
         vm_info['server'].start()
         while vm_status(name)['power_state'] != 1:
             time.sleep(1)
-    else:
-        print "vm_start: VM is already running: {0}".format(name)
     return
 
 
