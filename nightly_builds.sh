@@ -10,6 +10,7 @@
 NAME=$1
 BRANCH=$2	# Dev or master will be specified
 VM_NAME=$1-$BRANCH
+SKIP_TESTS=$3
 
 # Delete previous VM
 echo Deleting previous VM
@@ -44,7 +45,7 @@ ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
 	 git checkout '"'$BRANCH'"';
 	 ./install.sh;
 	 cd test;
-	 python test.py
+	 python test.py --skip_test '"'$SKIP_TESTS'"'
 	'
 
 
