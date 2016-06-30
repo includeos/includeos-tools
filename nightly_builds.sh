@@ -14,11 +14,11 @@ SKIP_TESTS=$3
 
 # Delete previous VM
 echo Deleting previous VM
-./openstack_control.py --vm_delete $VM_NAME
+./openstack_control.py --delete $VM_NAME
 
 # Launch new VM
 echo Launching new VM
-IP_ADDRESS=`./openstack_control.py --vm_create $VM_NAME`
+IP_ADDRESS=`./openstack_control.py --create $VM_NAME`
 echo "IP is : $IP_ADDRESS"
 
 # Install dependencies
@@ -30,6 +30,7 @@ ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
      sudo apt-get update > /dev/null 2>&1;
      sudo apt-get -y install git > /dev/null 2>&1;
      sudo apt-get -y install arping > /dev/null 2>&1;
+     sudo apt-get -y install httperf > /dev/null 2>&1;
      sudo apt-get -y install python-pip > /dev/null 2>&1;
      sudo pip install --upgrade pip;
      sudo pip install jsonschema;
@@ -44,9 +45,10 @@ ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
 	 cd IncludeOS;
 	 git checkout '"'$BRANCH'"';
 	 ./install.sh;
-	 cd test;
-	 python test.py --skip_test '"'$SKIP_TESTS'"'
 	'
 
-
-
+echo ">>> Will now run all the available tests"
+ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+	'cd IncludeOS/test;
+     python test.py --skip_test '"'$SKIP_TESTS'"'
+    '
