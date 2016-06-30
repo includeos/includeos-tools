@@ -190,29 +190,35 @@ def main():
                         help="Name of network to connect to")
 
     # Calling functions
-    parser.add_argument("--vm_status", action="store_const",
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--status", action="store_const",
                         const=vm_status, dest="cmd",
                         help="Return status of VM")
-    parser.add_argument("--vm_create", action="store_const",
+    group.add_argument("--create", action="store_const",
                         const=vm_create, dest="cmd",
                         help="Creates a new VM")
-    parser.add_argument("--vm_delete", action="store_const",
+    group.add_argument("--delete", action="store_const",
                         const=vm_delete, dest="cmd",
                         help="Delete the VM")
-    parser.add_argument("--vm_start", action="store_const",
+    group.add_argument("--start", action="store_const",
                         const=vm_start, dest="cmd",
                         help="Start the VM")
-    parser.add_argument("--vm_stop", action="store_const",
+    group.add_argument("--stop", action="store_const",
                         const=vm_stop, dest="cmd",
                         help="Stop the VM")
 
     args = parser.parse_args()
     if args.cmd is None:
-        args.parse_args(['-h'])
+        # args.parse_args(['-h'])
+        parser.print_help()
     elif args.cmd is vm_create:
         args.cmd(args.name, image=args.image, flavor=args.flavor,
                  key_pair=args.key_pair, network_name=args.network_name)
         print vm_status(args.name)['network'][1]
+    elif args.cmd is vm_status:
+        status = vm_status(args.name)
+        for stat in status:
+            print "{0}: {1}".format(stat, status[stat])
     else:
         args.cmd(args.name)
 
