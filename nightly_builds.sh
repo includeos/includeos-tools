@@ -50,5 +50,5 @@ ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
 echo ">>> Will now run all the available tests"
 ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
 	'cd IncludeOS/test;
-     python test.py --skip_test '"'$SKIP_TESTS'"'
+     sudo python test.py --skip_test '"'$SKIP_TESTS'"'
     '
