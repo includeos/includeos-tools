@@ -19,33 +19,30 @@ IP_IOS_SERVER=$2
 function ping_flood {
     IP_HOST=$1
     IP_TARGET=$2
-    echo "Ping: "
 
     ssh $IP_HOST -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
         'sudo ping '"'$IP_TARGET'"' -f -c '"'$BURST_SIZE'"' | grep received
-        '
+        ' > /dev/null 2>&1
     }
 
 function httperf_flood {
     IP_HOST=$1
     IP_TARGET=$2
-    echo "httperf: "
 
     ssh $IP_HOST -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
         'httperf --hog --server '"'$IP_TARGET'"' --num-conn '"'$BURST_SIZE'"' |
     grep Total
-        '
+        ' > /dev/null 2>&1
 
     }
 
 function arping_flood {
     IP_HOST=$1
     IP_TARGET=$2
-    echo "arping: "
 
     ssh $IP_HOST -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
         'sudo arping -w 100 -c '"'$BURST_SIZE'"' '"'$IP_TARGET'"' | grep received
-        '
+        ' > /dev/null 2>&1
     }
 
 ping_flood $IP_HOST $IP_IOS_SERVER

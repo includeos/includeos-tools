@@ -22,7 +22,7 @@ function check_if_up {
     IP_TARGET=$2
 
     ssh $IP_HOST -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        'ping '"'$IP_TARGET'"' -c 1 > /dev/null 2>&1
+        'ping '"'$IP_TARGET'"' -c 1 > /dev/null 2>&1;
         '
     if [ $? -ne 0 ] 
         then
@@ -41,7 +41,7 @@ function check_if_up {
     fi
     }
 
-for i in $(seq 1 10);
+for i in $(seq 1 100);
 do
     ./bombardment.sh $IP_STRESS_1 $IP_IOS_SERVER &
     ./bombardment.sh $IP_STRESS_2 $IP_IOS_SERVER 
