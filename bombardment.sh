@@ -5,7 +5,8 @@
 # UDP burst
 # ICMP flood (ping)
 # httperf
-BURST_SIZE=1000
+BURST_SIZE=70000
+RATE=700
 
 # Launch VMs
 # There will be one IncludeOS server running a http server.
@@ -21,7 +22,7 @@ function ping_flood {
     IP_TARGET=$2
 
     ssh $IP_HOST -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        'sudo ping '"'$IP_TARGET'"' -f -c '"'$BURST_SIZE'"' | grep received
+        'sudo ping '"'$IP_TARGET'"' -f -c '"'$BURST_SIZE'"' 
         ' > /dev/null 2>&1
     }
 
@@ -30,8 +31,7 @@ function httperf_flood {
     IP_TARGET=$2
 
     ssh $IP_HOST -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        'httperf --hog --server '"'$IP_TARGET'"' --num-conn '"'$BURST_SIZE'"' |
-    grep Total
+        'httperf --hog --server '"'$IP_TARGET'"' --num-conn '"'$BURST_SIZE'"' --rate '"'$RATE'"'
         ' > /dev/null 2>&1
 
     }
@@ -41,7 +41,7 @@ function arping_flood {
     IP_TARGET=$2
 
     ssh $IP_HOST -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        'sudo arping -w 100 -c '"'$BURST_SIZE'"' '"'$IP_TARGET'"' | grep received
+        'sudo arping -w 100 -c '"'$BURST_SIZE'"' '"'$IP_TARGET'"' 
         ' > /dev/null 2>&1
     }
 
