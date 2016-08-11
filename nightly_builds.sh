@@ -32,6 +32,7 @@ ssh $IP_ADDRESS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
      sudo apt-get -y install arping > /dev/null 2>&1;
      sudo apt-get -y install httperf > /dev/null 2>&1;
      sudo apt-get -y install python-pip > /dev/null 2>&1;
+     export LC_CTYPE=C.UTF-8
      sudo pip install --upgrade pip;
      sudo pip install jsonschema;
      ' > /dev/null 2>&1
