@@ -5,7 +5,8 @@
 # UDP burst
 # ICMP flood (ping)
 # httperf
-BURST_SIZE=1000
+BURST_SIZE=2000
+RATE=200
 
 # Launch VMs
 # There will be one IncludeOS server running a http server.
@@ -13,7 +14,7 @@ BURST_SIZE=1000
 
 
 # Initiate tests through the stress-clients
-IP_IOS_SERVER=10.10.10.132
+IP_IOS_SERVER=10.10.10.142
 IP_STRESS_1=10.10.10.131 
 IP_STRESS_2=10.10.10.133
 
@@ -39,12 +40,20 @@ function check_if_up {
         echo "Wget did not download correctly, exiting"
         exit 1
     fi
-    }
+}
 
-for i in $(seq 1 100);
+function initiate_bombardment {
+    IP_HOST=$1
+    IP_TARGET=$2
+
+    ssh $IP_HOST -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        './bombardment.py --burst_size '"'$BURST_SIZE'"' --rate '"'$RATE'"''
+}
+
+for i in $(seq 1 10);
 do
-    ./bombardment.sh $IP_STRESS_1 $IP_IOS_SERVER &
-    ./bombardment.sh $IP_STRESS_2 $IP_IOS_SERVER 
+    initiate_bombardment $IP_STRESS_1 $IP_IOS_SERVER &
+    initiate_bombardment $IP_STRESS_2 $IP_IOS_SERVER 
 
     check_if_up $IP_STRESS_1 $IP_IOS_SERVER
     echo "LOOP: $i All good"
