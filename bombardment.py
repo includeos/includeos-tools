@@ -4,10 +4,13 @@ import subprocess
 import time
 import re
 import argparse
+import commands
 
 RATE = 700
 BURST_SIZE = RATE * 10
 HOST = "10.10.10.142"
+STRESS_HOST_1 = "10.10.10.131"
+STRESS_HOST_2 = "10.10.10.133"
 
 
 def ICMP_flood(burst_size=BURST_SIZE):
@@ -18,7 +21,10 @@ def ICMP_flood(burst_size=BURST_SIZE):
 
 # Fire a single burst of HTTP requests
 def httperf(burst_size=BURST_SIZE, rate=RATE):
-    res = subprocess.check_output(["httperf", "--hog", "--server", HOST, "--num-conn", str(burst_size), "--rate", str(rate)], stderr=subprocess.PIPE)
+    #res = commands.getstatusoutput("ssh ....")
+    res = subprocess.check_output([
+        "ssh", STRESS_HOST_1, "-q", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "'",
+        "httperf", "--hog", "--server", HOST, "--num-conn", str(burst_size), "--rate", str(rate), "'"], stderr=subprocess.PIPE)
     regex = ("requests (?P<tot_requests>\S*) replies (?P<tot_replies>\S*) test(.|\n)*"
              "Connection rate: (?P<conn_rate>\S*) conn/s (.|\n)*"
              ".*replies/s]: min \S* avg (?P<reply_rate_avg>\S*) max")
