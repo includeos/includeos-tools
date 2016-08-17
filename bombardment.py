@@ -9,7 +9,7 @@ from multiprocessing import Process, Pool, Queue
 
 RATE = 700
 BURST_SIZE = RATE * 10
-HOST = "10.10.10.147"
+HOST = "10.10.10.148"
 STRESS_HOST_1 = "10.10.10.131"
 STRESS_HOST_2 = "10.10.10.133"
 SSH_HOST = [STRESS_HOST_1, STRESS_HOST_2]
@@ -59,13 +59,15 @@ def ARP_burst(burst_size = BURST_SIZE):
 
 def print_results(res):
     """Print the results in a nicely formatted way"""
-    print ("Total requests: {0} \t"
+    print ("Loop: {4:.0f} \t"
+           "Total requests: {0} \t"
            "Total replies: {1} \t"
-           "Connection rate: {2} \t"
-           "Reply rate avg: {3}".format(res['total_requests'],
+           "Connection rate: {2:.1f} \t"
+           "Reply rate avg: {3:.1f}".format(res['total_requests'],
                                         res['total_replies'],
                                         res['connection_rate'],
-                                        res['reply_rate_avg']))
+                                        res['reply_rate_avg'],
+                                        res['total_number_of_loops'] / res['number_of_ssh_hosts']))
 
 def main():
 
@@ -91,12 +93,11 @@ def main():
             p[ip].start()
 
         for ip in SSH_HOST:
-            timeout_value = float(args.burst_size) / float(args.rate) * 1.1
+            timeout_value = float(args.burst_size) / float(args.rate) * 1.5
             p[ip].join(timeout_value)
-            print "Now joining {0}".format(ip)
             if p[ip].is_alive():
                 p[ip].terminate()
-                print "terminated"
+                print "Process on {0} timed out".format(ip)
                 continue
             results = q.get()
 
@@ -108,11 +109,13 @@ def main():
             total_results['total_connection_rate'] += float(results['connection_rate'])
             total_results['connection_rate'] = total_results['total_connection_rate'] / total_results['multiplier']
 
+            # TODO: Fix the reply rate average, now it only shows the last
+            # value
             total_results['reply_rate_avg'] = float(results['reply_rate_avg'])
+
             total_results['total_replies'] += int(results['total_replies'])
             total_results['total_requests'] += int(results['total_requests'])
         args.loops -= 1
-        print "Loop {0} results:".format(args.loops)
         print_results(total_results)
 
     for ip in SSH_HOST:
