@@ -172,6 +172,16 @@ def vm_start(name):
     return
 
 
+def image_upload(name):
+    """ Will upload an image using glance """
+    import glanceclient.v2.client as glclient
+    imagefile = "/home/ubuntu/stresstest.img"
+    glance = glclient.Client('2', session=sess)
+    with open(imagefile) as fimage:
+        image = glance.images.create(name=name, disk_format="raw", container_format="bare")
+        glance.images.upload(image.id, fimage, 'rb')
+
+
 def main():
 
     parser = argparse.ArgumentParser(description="Lets you create, start, \
@@ -207,6 +217,9 @@ def main():
     group.add_argument("--stop", action="store_const",
                         const=vm_stop, dest="cmd",
                         help="Stop the VM")
+    group.add_argument("--create_image", action="store_const",
+                        const=image_upload, dest="cmd",
+                        help="Create an image")
 
     args = parser.parse_args()
     if args.cmd is None:
