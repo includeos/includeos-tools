@@ -12,6 +12,7 @@ import subprocess
 from keystoneauth1.identity import v3
 from keystoneauth1 import session
 import novaclient.client
+import glanceclient.v2.client as glclient
 
 # Initiates the ConfigParser
 Config = ConfigParser.ConfigParser()
@@ -172,14 +173,18 @@ def vm_start(name):
     return
 
 
-def image_upload(name):
+def image_upload(name, imagefile):
     """ Will upload an image using glance """
-    import glanceclient.v2.client as glclient
     imagefile = "/home/ubuntu/stresstest.img"
     glance = glclient.Client('2', session=sess)
     with open(imagefile) as fimage:
         image = glance.images.create(name=name, disk_format="raw", container_format="bare")
         glance.images.upload(image.id, fimage, 'rb')
+
+
+def image_delete(name):
+    """ Will delete the specified image """
+
 
 
 def main():
@@ -199,6 +204,9 @@ def main():
     parser.add_argument("--network_name",
                         default=Config.get('Openstack', 'network_name'),
                         help="Name of network to connect to")
+    parser.add_argument("--image_path",
+                        default=Config.get('Openstack', 'image_path'),
+                        help="Path to image to upload")
 
     # Calling functions
     group = parser.add_mutually_exclusive_group(required=True)
@@ -233,6 +241,8 @@ def main():
         status = vm_status(args.name)
         for stat in status:
             print "{0}: {1}".format(stat, status[stat])
+    elif args.cmd is image_upload:
+        image_upload(args.name, args.image_path)
     else:
         args.cmd(args.name)
 

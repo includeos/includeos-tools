@@ -1,0 +1,18 @@
+[Openstack]
+# Image name
+image: 1234abc
+
+# Flavor ID, not the name
+flavor: 1234abcd
+
+# Key pair name
+key_pair: name of keu
+
+# Network id
+network_id: 1234abc
+
+# Network name 
+network_name: network_name
+
+# Image path
+image_path: ImageName
