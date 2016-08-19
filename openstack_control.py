@@ -26,7 +26,6 @@ auth = v3.Password(auth_url=os.environ['OS_AUTH_URL'],
                    project_domain_name=os.environ['OS_PROJECT_DOMAIN_NAME'])
 sess = session.Session(auth=auth)
 nova = novaclient.client.Client(2, session=sess)
-# glance = glclient.Client(2, session=sess)
 
 
 def vm_create(name,
@@ -46,6 +45,8 @@ def vm_create(name,
 
     nics = [{"net-id": nova.networks.find(label=network_name).id,
              "v4-fixed-ip": ''}]
+    image = nova.images.find(name=image)
+
     # print "vm_create: Will create a VM: {0}".format(name)
     nova.servers.create(name,
                         image=image,
