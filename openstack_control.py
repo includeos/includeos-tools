@@ -177,7 +177,7 @@ def vm_start(name):
 def image_upload(name, imagefile):
     """ Will upload an image using glance """
     with open(imagefile) as fimage:
-        image = glance.images.create(name=name, disk_format="raw", container_format="bare")
+        image = glance.images.create(name=name, disk_format="raw", container_format="bare", hw_disk_bus="ide")
         glance.images.upload(image.id, fimage, 'rb')
 
 
