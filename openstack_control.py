@@ -27,6 +27,7 @@ auth = v3.Password(auth_url=os.environ['OS_AUTH_URL'],
                    project_domain_name=os.environ['OS_PROJECT_DOMAIN_NAME'])
 sess = session.Session(auth=auth)
 nova = novaclient.client.Client(2, session=sess)
+glance = glclient.Client('2', session=sess)
 
 
 def vm_create(name,
@@ -175,8 +176,6 @@ def vm_start(name):
 
 def image_upload(name, imagefile):
     """ Will upload an image using glance """
-    imagefile = "/home/ubuntu/stresstest.img"
-    glance = glclient.Client('2', session=sess)
     with open(imagefile) as fimage:
         image = glance.images.create(name=name, disk_format="raw", container_format="bare")
         glance.images.upload(image.id, fimage, 'rb')
@@ -184,7 +183,8 @@ def image_upload(name, imagefile):
 
 def image_delete(name):
     """ Will delete the specified image """
-
+    image = nova.images.find(name=name)
+    glance.images.delete(image.id)
 
 
 def main():
@@ -228,6 +228,9 @@ def main():
     group.add_argument("--create_image", action="store_const",
                         const=image_upload, dest="cmd",
                         help="Create an image")
+    group.add_argument("--delete_image", action="store_const",
+                        const=image_delete, dest="cmd",
+                        help="Delete an image")
 
     args = parser.parse_args()
     if args.cmd is None:
