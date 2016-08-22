@@ -1,18 +1,22 @@
 [Openstack]
 # Image name
+# ubuntu16.04, ubuntu14.04
 image: 1234abc
 
-# Flavor ID, not the name
+# Flavor name
+# includeos.nano, includeos.micro
+# g1.small, g1.medium, g1.large
 flavor: 1234abcd
 
 # Key pair name
-key_pair: name of keu
-
-# Network id
-network_id: 1234abc
+# ubuntu jenkins2 master 
+# jenkins-includeos
+key_pair: name of key
 
 # Network name 
+# Private_IncludeOS
+# FloatingPool01
 network_name: network_name
 
 # Image path
-image_path: ImageName
+image_path: /path/to/image
