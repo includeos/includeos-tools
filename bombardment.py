@@ -3,8 +3,10 @@
 import subprocess
 import time
 import re
+import os
 import argparse
 import commands
+import openstack_control
 from multiprocessing import Process, Pool, Queue
 
 RATE = 700
@@ -69,13 +71,34 @@ def print_results(res):
                                         res['reply_rate_avg'],
                                         res['total_number_of_loops'] / res['number_of_ssh_hosts']))
 
+def deploy_ios(image_name, path):
+    """ Deploys an image to openstack, launches a VM with that image and returns the ip as a string """
+
+    vm_name = "bombardment_test"
+
+    openstack_control.image_upload(image_name, path)
+    openstack_control.vm_create(name = vm_name, image = image_name, flavor = "includeos.nano")
+    return openstack_control.vm_status(vm_name)['network'][1]
+
+def undeploy_ios(image_name):
+    """ Removes an image from openstack """
+
+    openstack_control.vm_delete("bombardment_test")
+    openstack_control.image_delete(image_name)
+    return
+
 def main():
 
     parser = argparse.ArgumentParser(description="Start a bombardment")
     parser.add_argument("-r", "--rate", default="200", dest="rate", help="http packets pr. second to send")
     parser.add_argument("-b", "--burst_size", default="100000", dest="burst_size", help="Total number of packets to send")
     parser.add_argument("-l", "--loops", default=1, type=int, dest="loops", help="Number of loops to perform")
+    parser.add_argument("-i", "--image", dest="image", help="Path to image to upload")
     args = parser.parse_args()
+
+
+    image_name = os.path.basename(args.image)
+    deploy_ios(image_name, args.image)
 
     q = Queue()
     p = {}
