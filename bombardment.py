@@ -12,7 +12,7 @@ from multiprocessing import Process, Pool, Queue
 RATE = 700
 BURST_SIZE = RATE * 10
 HOST = "10.10.10.148"
-STRESS_HOST_1 = "10.10.10.131"
+STRESS_HOST_1 = "10.10.10.112"
 STRESS_HOST_2 = "10.10.10.133"
 SSH_HOST = [STRESS_HOST_1, STRESS_HOST_2]
 
@@ -98,10 +98,10 @@ def main():
 
 
     image_name = os.path.basename(args.image)
-    deploy_ios(image_name, args.image)
+    target_ip = deploy_ios(image_name, args.image)
 
-    q = Queue()
-    p = {}
+    q = Queue() # Used to retrieve return values from the functions called in parallell
+    p = {}      # Used to store the values from all the functions
     total_results = {'total_number_of_loops': 0,
                      'multiplier': 0,
                      'number_of_ssh_hosts': float(len(SSH_HOST)),
@@ -110,17 +110,18 @@ def main():
                      'reply_rate_avg': 0,
                      'total_replies': 0,
                      'total_requests': 0}
+    timeout_value = float(args.burst_size) / float(args.rate) * 2
+    print "timeout: {0}".format(timeout_value)
     while(args.loops > 0):
         for ip in SSH_HOST:
-            p[ip] = Process(target=httperf, args=(q, ip, args.burst_size, args.rate))
+            p[ip] = Process(target=httperf, args=(q, ip, args.burst_size, args.rate, target_ip))
             p[ip].start()
 
         for ip in SSH_HOST:
-            timeout_value = float(args.burst_size) / float(args.rate) * 1.5
             p[ip].join(timeout_value)
             if p[ip].is_alive():
                 p[ip].terminate()
-                print "Process on {0} timed out".format(ip)
+                print "Bombardment: Process on {0} timed out".format(ip)
                 continue
             results = q.get()
 
@@ -143,6 +144,8 @@ def main():
 
     for ip in SSH_HOST:
         cleanup(ip)
+
+    undeploy_ios(image_name)
 
 
 if __name__ == "__main__":
