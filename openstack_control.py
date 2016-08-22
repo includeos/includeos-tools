@@ -34,17 +34,17 @@ def vm_create(name,
               image=Config.get('Openstack', 'image'),
               key_pair=Config.get('Openstack', 'key_pair'),
               flavor=Config.get('Openstack', 'flavor'),
-              network_name=Config.get('Openstack', 'network_name')):
+              network=Config.get('Openstack', 'network')):
     """ Creates a VM
 
     name = Name of VM
     image = Name of image file to use. (ubuntu14.04, ubuntu16.04)
     key_pair = Name of ssh key pair to inject into VM
     flavor = Resources to dedicate to VM (g1.small/g1.medium/g1.large)
-    network_name = Name of network to connect to
+    network = Name of network to connect to
     """
 
-    nics = [{"net-id": nova.networks.find(label=network_name).id,
+    nics = [{"net-id": nova.networks.find(label=network).id,
              "v4-fixed-ip": ''}]
     image = nova.images.find(name=image)
     flavor = nova.flavors.find(name=flavor)
@@ -201,8 +201,8 @@ def main():
     parser.add_argument("--flavor",
                         default=Config.get('Openstack', 'flavor'),
                         help="Name of flavor to use")
-    parser.add_argument("--network_name",
-                        default=Config.get('Openstack', 'network_name'),
+    parser.add_argument("--network",
+                        default=Config.get('Openstack', 'network'),
                         help="Name of network to connect to")
     parser.add_argument("--image_path",
                         default=Config.get('Openstack', 'image_path'),
@@ -238,7 +238,7 @@ def main():
         parser.print_help()
     elif args.cmd is vm_create:
         args.cmd(args.name, image=args.image, flavor=args.flavor,
-                 key_pair=args.key_pair, network_name=args.network_name)
+                 key_pair=args.key_pair, network=args.network)
         print vm_status(args.name)['network'][1]
     elif args.cmd is vm_status:
         status = vm_status(args.name)
