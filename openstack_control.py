@@ -48,6 +48,7 @@ def vm_create(name,
     nics = [{"net-id": nova.networks.find(label=network_name).id,
              "v4-fixed-ip": ''}]
     image = nova.images.find(name=image)
+    flavor = nova.flavors.find(name=flavor)
 
     # print "vm_create: Will create a VM: {0}".format(name)
     nova.servers.create(name,
