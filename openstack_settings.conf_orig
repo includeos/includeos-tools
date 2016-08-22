@@ -1,3 +1,7 @@
+# Config file for the openstack_control.py program
+# Rename this file to openstack_settings.conf before running
+
+
 [Openstack]
 # Image name
 # ubuntu16.04, ubuntu14.04
