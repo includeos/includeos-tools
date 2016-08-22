@@ -175,7 +175,17 @@ def vm_start(name):
 
 
 def image_upload(name, imagefile):
-    """ Will upload an image using glance """
+    """ Will upload an image using glance. Will overwrite existing images
+        with the same name. """
+
+    # Starts with a check for existing images with the same name.
+    try:
+        # Try to delete the image
+        image_delete(name)
+    except novaclient.exceptions.NotFound:
+        # Continue if it did not exist
+        pass
+
     with open(imagefile) as fimage:
         image = glance.images.create(name=name, disk_format="raw", container_format="bare", hw_disk_bus="ide")
         glance.images.upload(image.id, fimage, 'rb')
