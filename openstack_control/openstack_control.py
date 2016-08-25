@@ -15,8 +15,9 @@ import novaclient.client
 import glanceclient.v2.client as glclient
 
 # Initiates the ConfigParser
+location = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 Config = ConfigParser.ConfigParser()
-Config.read('openstack_settings.conf')
+Config.read(os.path.join(location, 'openstack_settings.conf'))
 
 # Initiates the authentication used towards OpenStack
 auth = v3.Password(auth_url=os.environ['OS_AUTH_URL'],

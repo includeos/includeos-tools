@@ -4,10 +4,17 @@ import subprocess
 import time
 import re
 import os
+import sys
 import argparse
 import commands
-import openstack_control
 from multiprocessing import Process, Pool, Queue
+
+__location__ = os.path.realpath(
+        os.path.join(os.getcwd(), os.path.dirname(__file__)))
+print __location__
+print os.path.join(__location__, '../openstack_control')
+sys.path.append('../openstack_control')
+import openstack_control
 
 RATE = 700
 BURST_SIZE = RATE * 10
