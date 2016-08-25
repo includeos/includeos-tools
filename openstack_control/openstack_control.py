@@ -236,7 +236,7 @@ def main():
     group.add_argument("--stop", action="store_const",
                         const=vm_stop, dest="cmd",
                         help="Stop the VM")
-    group.add_argument("--create_image", action="store_const",
+    group.add_argument("--upload_image", action="store_const",
                         const=image_upload, dest="cmd",
                         help="Create an image")
     group.add_argument("--delete_image", action="store_const",
