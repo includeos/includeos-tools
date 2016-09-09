@@ -3,7 +3,17 @@ This script let's you easily interact with openstack. You can:
 - Upload or remove images
 - Create or delete virtual machines running on openstack
 
+## Set up an alias for easier usage
+```bash
+alias ostack='~/includeos-tools/openstack_control/openstack_control.py'
+```
+
 ## Quick reference guide
+- To use the short form to upload and launch an image in your current directory
+```bash
+ostack --instant
+```
+
 - In order to upload an image named `example` located at `~/ex.img`
 ```bash
 ./openstack_control.py --upload_image example --image_path ~/ex.img
