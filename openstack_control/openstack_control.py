@@ -5,10 +5,12 @@ Interfaces with openstack to start, stop, create and delete VM's
 """
 
 import os
+import sys
 import ConfigParser
 import argparse
 import time
 import subprocess
+import glob # Used for finding files in dir
 from keystoneauth1.identity import v3
 from keystoneauth1 import session
 import novaclient.client
@@ -67,19 +69,20 @@ def vm_create(name,
         time.sleep(1)
 
     # Will complete a ping before moving on
-    ping_response = False
-    while ping_response is False:
+    for x in range(0,10):
         try:
             ip = vm_status(name)['network'][1]
             with open(os.devnull, 'wb') as devnull:
                 response = subprocess.check_call(['ping', '-c', '1', ip],
                                                  stdout=devnull)
             if response == 0:
-                ping_response = True
+                return
         except:
             continue
         time.sleep(2)
-    return
+
+    print "Error: Instance did not respond to ping"
+    sys.exit(1)
 
 
 def vm_delete(name):
@@ -198,12 +201,31 @@ def image_delete(name):
     glance.images.delete(image.id)
 
 
+def instant():
+    """ Looks for necessary files in current directory, uploads image and starts service with the name of the folder """
+
+    # Check for necessary files, image
+    if glob.glob("./*img"):
+        image_path = glob.glob("./*img")[0]
+    else:
+        print "No Image found in current directory"
+        sys.exit(1)
+
+    service_name = os.path.abspath(".").split("/")[-1]
+    print "name: {0}  image: {1}".format(service_name, image_path)
+
+    # Upload image, overwriting existing ones
+    image_upload(service_name, image_path)
+
+    # Start service
+    vm_create(service_name, image=service_name, flavor="includeos.micro", network="FloatingPool01")
+
 def main():
 
     parser = argparse.ArgumentParser(description="Lets you create, start, \
                                      stop and delete Openstack VM's")
 
-    parser.add_argument("name", help="Name of the VM")
+    parser.add_argument("name", nargs='?', help="Name of the VM")
     parser.add_argument("--image", default=Config.get('Openstack', 'image'),
                         help="Name of Openstack image to use")
     parser.add_argument("--key_pair",
@@ -226,6 +248,9 @@ def main():
                         help="Return status of VM")
     group.add_argument("--create", action="store_const",
                         const=vm_create, dest="cmd",
+                        help="Creates a new VM")
+    group.add_argument("--instant", action="store_const",
+                        const=instant, dest="cmd",
                         help="Creates a new VM")
     group.add_argument("--delete", action="store_const",
                         const=vm_delete, dest="cmd",
@@ -257,6 +282,9 @@ def main():
             print "{0}: {1}".format(stat, status[stat])
     elif args.cmd is image_upload:
         image_upload(args.name, args.image_path)
+    elif args.cmd is instant:
+        instant()
+        print vm_status(args.name)['network'][1]
     else:
         args.cmd(args.name)
 

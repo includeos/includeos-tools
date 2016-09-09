@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 
 import subprocess
-import time
 import re
 import os
 import sys
 import argparse
 import commands
-from multiprocessing import Process, Pool, Queue
+from multiprocessing import Process, Queue
 
+# Module import of openstack control script
 __location__ = os.path.realpath(
         os.path.join(os.getcwd(), os.path.dirname(__file__)))
-print __location__
-print os.path.join(__location__, '../openstack_control')
 sys.path.append('../openstack_control')
 import openstack_control
 
@@ -93,6 +91,53 @@ def undeploy_ios(image_name):
     openstack_control.vm_delete("bombardment_test")
     openstack_control.image_delete(image_name)
     return
+
+def loop(loops, burst_size, rate, target_ip):
+    """ Will use
+    """
+
+    q = Queue() # Used to retrieve return values from the functions called in parallell
+    p = {}      # Used to store the values from all the functions
+    total_results = {'total_number_of_loops': 0,
+                     'multiplier': 0,
+                     'number_of_ssh_hosts': float(len(SSH_HOST)),
+			         'total_connection_rate': 0,
+					 'connection_rate': 0,
+					 'reply_rate_avg': 0,
+					 'total_replies': 0,
+                     'total_requests': 0}
+    timeout_value = float(args.burst_size) / float(args.rate) * 2
+    print "timeout: {0}".format(timeout_value)
+    while(loops > 0):
+            for ip in SSH_HOST:
+                # Starts the httperf process on all the hosts in SSH_HOST
+                p[ip] = Process(target=httperf, args=(q, ip, burst_size, rate, target_ip))
+                p[ip].start()
+
+            for ip in SSH_HOST:
+                p[ip].join(timeout_value)
+                if p[ip].is_alive():
+                    p[ip].terminate()
+                    print "Bombardment: Process on {0} timed out".format(ip)
+                    continue
+                results = q.get()
+
+                # Calculating loop
+                total_results['total_number_of_loops'] += 1
+                total_results['multiplier'] = total_results['total_number_of_loops'] / float(total_results['number_of_ssh_hosts'])
+
+                # Connection rate calculations
+                total_results['total_connection_rate'] += float(results['connection_rate'])
+                total_results['connection_rate'] = total_results['total_connection_rate'] / total_results['multiplier']
+
+                # TODO: Fix the reply rate average, now it only shows the last
+                # value
+                total_results['reply_rate_avg'] = float(results['reply_rate_avg'])
+
+                total_results['total_replies'] += int(results['total_replies'])
+                total_results['total_requests'] += int(results['total_requests'])
+            args.loops -= 1
+    print_results(total_results)
 
 def main():
 
