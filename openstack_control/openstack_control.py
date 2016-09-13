@@ -223,8 +223,14 @@ def instant():
     # Upload image, overwriting existing ones
     image_upload(service_name, image_path)
 
+    # Delete image with the same name
+    vm_delete(service_name)
+
     # Start service
     vm_create(service_name, image=service_name, flavor="includeos.micro", network="FloatingPool01", key_pair="IncludeOS")
+
+    # Return name of service
+    return service_name
 
 def main():
 
@@ -292,8 +298,8 @@ def main():
     elif args.cmd is image_upload:
         image_upload(args.name, args.image_path)
     elif args.cmd is instant:
-        instant()
-        print vm_status(args.name)['network'][1]
+        service_name = instant()
+        print vm_status(service_name)['network'][1]
     else:
         args.cmd(args.name)
 
