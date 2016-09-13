@@ -122,7 +122,7 @@ def vm_status(name):
     status_dict = {}
 
     # Find server
-    options = {'name': name}
+    options = {'name':'^{}$'.format(name)}
     server = nova.servers.list(search_opts=options)
     if not server:
         # print "No server found with the name: {0}".format(name)
@@ -284,8 +284,11 @@ def main():
         print vm_status(args.name)['network'][1]
     elif args.cmd is vm_status:
         status = vm_status(args.name)
-        for stat in status:
-            print "{0}: {1}".format(stat, status[stat])
+        if status:
+            for stat in status:
+                print "{0}: {1}".format(stat, status[stat])
+        else:
+            print "No vm with the name {} found".format(args.name)
     elif args.cmd is image_upload:
         image_upload(args.name, args.image_path)
     elif args.cmd is instant:
