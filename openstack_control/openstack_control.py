@@ -52,12 +52,18 @@ def vm_create(name,
     image = nova.images.find(name=image)
     flavor = nova.flavors.find(name=flavor)
 
-    # print "vm_create: Will create a VM: {0}".format(name)
-    nova.servers.create(name,
-                        image=image,
-                        flavor=flavor,
-                        nics=nics,
-                        key_name=key_pair)
+    # Using key pair is not required if booting IncludeOS images
+    if key_pair == 'IncludeOS':
+        nova.servers.create(name,
+                            image=image,
+                            flavor=flavor,
+                            nics=nics)
+    else:
+        nova.servers.create(name,
+                            image=image,
+                            flavor=flavor,
+                            nics=nics,
+                            key_name=key_pair)
 
     # Won't exit before the server is active
     status = ''
@@ -69,7 +75,7 @@ def vm_create(name,
         time.sleep(1)
 
     # Will complete a ping before moving on
-    for x in range(0,10):
+    for x in range(0,30):
         try:
             ip = vm_status(name)['network'][1]
             with open(os.devnull, 'wb') as devnull:
@@ -79,7 +85,7 @@ def vm_create(name,
                 return
         except:
             continue
-        time.sleep(2)
+        time.sleep(0.5)
 
     print "Error: Instance did not respond to ping"
     sys.exit(1)
@@ -92,7 +98,7 @@ def vm_delete(name):
     try:
         vm_status(name)['server'].delete()
     except TypeError:
-        pass
+        return
         # print "vm_delete: No VM to delete: {0}".format(name)
 
     # Will not exit until vm is truely gone
@@ -218,7 +224,7 @@ def instant():
     image_upload(service_name, image_path)
 
     # Start service
-    vm_create(service_name, image=service_name, flavor="includeos.micro", network="FloatingPool01")
+    vm_create(service_name, image=service_name, flavor="includeos.micro", network="FloatingPool01", key_pair="IncludeOS")
 
 def main():
 
