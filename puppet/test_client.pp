@@ -10,12 +10,13 @@ package { "python-jsonschema" :
 package { "dnsmasq" :
         ensure => present,
 }
-service { "dnsmasq" :
+service { 'dnsmasq' :
         ensure => running,
         require => Package['dnsmasq'],
 }
 exec { "modify-dnsmasq" :
         path => "/opt/puppetlabs/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
-        command => 'echo -e "interface=include0 \ndhcp-range=10.0.0.2,10.0.0.200,12h" >> /etc/dnsmasq.conf',
+        command => 'echo "interface=include0 \ndhcp-range=10.0.0.2,10.0.0.200,12h" >> /etc/dnsmasq.conf',
         unless => 'grep -q include0 /etc/dnsmasq.conf',
+        notify => Service['dnsmasq'],
 }
