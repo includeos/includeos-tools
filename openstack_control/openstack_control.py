@@ -10,7 +10,7 @@ import ConfigParser
 import argparse
 import time
 import subprocess
-import glob # Used for finding files in dir
+import glob     # Used for finding files in dir
 from keystoneauth1.identity import v3
 from keystoneauth1 import session
 import novaclient.client
@@ -37,7 +37,8 @@ def vm_create(name,
               image=Config.get('Openstack', 'image'),
               key_pair=Config.get('Openstack', 'key_pair'),
               flavor=Config.get('Openstack', 'flavor'),
-              network=Config.get('Openstack', 'network')):
+              network=Config.get('Openstack', 'network'),
+              floating_ip=None):
     """ Creates a VM
 
     name = Name of VM
@@ -75,17 +76,21 @@ def vm_create(name,
         time.sleep(1)
 
     # Will complete a ping before moving on
-    for x in range(0,30):
+    for x in range(0, 30):
         try:
             ip = vm_status(name)['network'][1]
             with open(os.devnull, 'wb') as devnull:
                 response = subprocess.check_call(['ping', '-c', '1', ip],
                                                  stdout=devnull)
             if response == 0:
+                if floating_ip:
+                    associate_floating_ip(name, floating_ip)
                 return
         except:
             continue
         time.sleep(0.5)
+
+    print floating_ip
 
     print "Error: Instance did not respond to ping"
     sys.exit(1)
@@ -122,7 +127,7 @@ def vm_status(name):
     status_dict = {}
 
     # Find server
-    options = {'name':'^{}$'.format(name)}
+    options = {'name': '^{}$'.format(name)}
     server = nova.servers.list(search_opts=options)
     if not server:
         # print "No server found with the name: {0}".format(name)
@@ -207,6 +212,21 @@ def image_delete(name):
     glance.images.delete(image.id)
 
 
+def associate_floating_ip(name, ip=Config.get('Openstack', 'instant_floating')):
+    """ Will associate a floating ip with an instance name.
+
+    Args:
+        name: Name of the instance to associate with
+        ip: Floating ip to assign, gets default from config
+
+    Returns:
+        None
+    """
+    server = vm_status(name)['server']
+    server.add_floating_ip(ip)
+    return
+
+
 def instant():
     """ Looks for necessary files in current directory, uploads image and starts service with the name of the folder """
 
@@ -227,10 +247,14 @@ def instant():
     vm_delete(service_name)
 
     # Start service
-    vm_create(service_name, image=service_name, flavor="includeos.micro", network="FloatingPool01", key_pair="IncludeOS")
+    vm_create(service_name, image=service_name, flavor="includeos.micro", network="Private_IncludeOS", key_pair="IncludeOS")
+
+    # Associate floating ip
+    associate_floating_ip(service_name)
 
     # Return name of service
     return service_name
+
 
 def main():
 
@@ -252,33 +276,37 @@ def main():
     parser.add_argument("--image_path",
                         default=Config.get('Openstack', 'image_path'),
                         help="Path to image to upload")
+    parser.add_argument("--floating_ip", action='store', nargs='?',
+                        const=Config.get('Openstack', 'floating_ip'),
+                        default=None,
+                        help="Will associate with a floating ip")
 
     # Calling functions
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--status", action="store_const",
-                        const=vm_status, dest="cmd",
-                        help="Return status of VM")
+                       const=vm_status, dest="cmd",
+                       help="Return status of VM")
     group.add_argument("--create", action="store_const",
-                        const=vm_create, dest="cmd",
-                        help="Creates a new VM")
+                       const=vm_create, dest="cmd",
+                       help="Creates a new VM")
     group.add_argument("--instant", action="store_const",
-                        const=instant, dest="cmd",
-                        help="Creates a new VM")
+                       const=instant, dest="cmd",
+                       help="Creates a new VM")
     group.add_argument("--delete", action="store_const",
-                        const=vm_delete, dest="cmd",
-                        help="Delete the VM")
+                       const=vm_delete, dest="cmd",
+                       help="Delete the VM")
     group.add_argument("--start", action="store_const",
-                        const=vm_start, dest="cmd",
-                        help="Start the VM")
+                       const=vm_start, dest="cmd",
+                       help="Start the VM")
     group.add_argument("--stop", action="store_const",
-                        const=vm_stop, dest="cmd",
-                        help="Stop the VM")
+                       const=vm_stop, dest="cmd",
+                       help="Stop the VM")
     group.add_argument("--upload_image", action="store_const",
-                        const=image_upload, dest="cmd",
-                        help="Create an image")
+                       const=image_upload, dest="cmd",
+                       help="Create an image")
     group.add_argument("--delete_image", action="store_const",
-                        const=image_delete, dest="cmd",
-                        help="Delete an image")
+                       const=image_delete, dest="cmd",
+                       help="Delete an image")
 
     args = parser.parse_args()
     if args.cmd is None:
@@ -286,7 +314,8 @@ def main():
         parser.print_help()
     elif args.cmd is vm_create:
         args.cmd(args.name, image=args.image, flavor=args.flavor,
-                 key_pair=args.key_pair, network=args.network)
+                 key_pair=args.key_pair, network=args.network,
+                 floating_ip=args.floating_ip)
         print vm_status(args.name)['network'][1]
     elif args.cmd is vm_status:
         status = vm_status(args.name)
