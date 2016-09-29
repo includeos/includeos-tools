@@ -10,6 +10,9 @@ package { "python-jsonschema" :
 package { "dnsmasq" :
         ensure => present,
 }
+package { "g++" :
+        ensure => present,
+}
 service { 'dnsmasq' :
         ensure => running,
         require => Package['dnsmasq'],
