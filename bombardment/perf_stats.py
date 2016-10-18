@@ -7,13 +7,13 @@ import signal
 
 
 def signal_handler(signal, frame):
-    """Used for handling cleanup if the program is aborted    
+    """Used for handling cleanup if the program is aborted
     """
-    
+
     print('Aborted. Will shut down all httperf processes')
     for client in Httperf.all_clients:
         command = ('ssh {0} -q -o StrictHostKeyChecking=no -o '
-                   'UserKnownHostsFile=/dev/null "pkill httperf "'.format(client)
+                   'UserKnownHostsFile=/dev/null "pkill httperf "').format(client)
         subprocess.call(command, shell=True)
     sys.exit(0)
 signal.signal(signal.SIGINT, signal_handler)
@@ -46,7 +46,7 @@ class Httperf():
     def __str__(self):
         """str function used for printing
         """
-        
+
         return ('Client: {x[client]}\n'
                 'Target: {x[target]}\n'
                 'tot_requests: {x[tot_requests]}\n'
@@ -85,18 +85,18 @@ class Httperf():
 
     def is_running(self):
         """Check the status of the running command on the external machine
-        
+
         Returns:
         True: If there is an httperf command running
         False: If no httperf command is running
         """
-        
-        command = ('ssh {0} -q -o StrictHostKeyChecking=no -o '
-                   'UserKnownHostsFile=/dev/null "pgrep httperf "'.format(self.client)
 
-        if subprocess.call(command, shell=True) = 0:
+        command = ('ssh {0} -q -o StrictHostKeyChecking=no -o '
+                   'UserKnownHostsFile=/dev/null "pgrep httperf "').format(self.client)
+
+        if subprocess.call(command, stdout=subprocess.PIPE, shell=True) == 0:
             return True
-        else: 
+        else:
             return False
 
 
@@ -106,5 +106,5 @@ if __name__ == '__main__':
     rate = 100
     num_conns = 2000
     obj = Httperf(client, target)
-    obj.run(rate, num_conns)
-    print obj
+    # obj.run(rate, num_conns)
+    print obj.is_running()
