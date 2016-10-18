@@ -68,7 +68,7 @@ class Httperf():
                    ).format(self.client, self.target, num_conns, rate)
 
         # Run the command
-        result = subprocess.check_output(command, shell=True)
+        result = subprocess.check_output(command, stderr=subprocess.PIPE, shell=True)
 
         # Process output
         regex = ("requests (?P<tot_requests>\S*) replies (?P<tot_replies>\S*) test(.|\n)*"
@@ -76,10 +76,10 @@ class Httperf():
                  ".*replies/s]: min \S* avg (?P<reply_rate_avg>\S*) max")
         output = re.search(regex, result)
 
-        self.tot_requests = output.group('tot_requests')
-        self.tot_replies = output.group('tot_replies')
-        self.conn_rate = output.group('conn_rate')
-        self.reply_rate_avg = output.group('reply_rate_avg')
+        self.tot_requests = float(output.group('tot_requests'))
+        self.tot_replies = float(output.group('tot_replies'))
+        self.conn_rate = float(output.group('conn_rate'))
+        self.reply_rate_avg = float(output.group('reply_rate_avg'))
 
         return
 
@@ -98,41 +98,48 @@ class Httperf():
             return True
         else:
             return False
-            
-            
-            
+
 
 def statcalc(clients):
     """Calculates aggregate statistics from the list of supplied Httperf objects.
-    
+
     Args:
     clients (list[Httperf]): The Httperf objects to calculate statistics from
-    
+
     Returns:
     ..............
     """
-    
-    num_clients = len(clients)
-    average_conn_rate = 0
-    average_reply_rate_avg = 0
-    
+
+    results = {}
+    results['average_conn_rate'] = 0
+    results['average_reply_rate_avg'] = 0
+    results['tot_requests'] = 0
+    results['tot_replies'] = 0
+    results['aggregate_conn_rate'] = 0
+    results['average_conn_rate'] = 0
+    results['aggregate_reply_rate'] = 0
+    results['average_reply_rate_avg'] = 0
+
     for i, client in enumerate(clients):
-        tot_requests += client.tot_requests
-        tot_replies += client.tot_replies
-        aggregate_conn_rate += client.conn_rate
-        average_conn_rate = (average_conn_rate + client.conn_rate) / i
-        aggregate_reply_rate += client.reply_rate_avg 
-        average_reply_rate_avg = (average_reply_rate_avg + client.reply_rate_avg) / i
-        
-    
-        
-        
+        results['tot_requests'] += client.tot_requests
+        results['tot_replies'] += client.tot_replies
+        results['aggregate_conn_rate'] += client.conn_rate
+        results['average_conn_rate'] = (results['average_conn_rate'] + client.conn_rate) / (i+1)
+        results['aggregate_reply_rate'] += client.reply_rate_avg
+        results['average_reply_rate_avg'] = (results['average_reply_rate_avg'] + client.reply_rate_avg) / (i+1)
+
+    print results
+
 
 if __name__ == '__main__':
     client = '10.10.10.133'
+    client2 = '10.10.10.112'
     target = '10.10.10.124'
-    rate = 100
+    rate = 200
     num_conns = 2000
     obj = Httperf(client, target)
-    # obj.run(rate, num_conns)
-    print obj.is_running()
+    obj2 = Httperf(client2, target)
+    x = [obj, obj2]
+
+    map(lambda y: y.run(rate, num_conns), x)
+    statcalc(x)
