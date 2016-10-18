@@ -5,15 +5,6 @@ import re
 import sys
 import signal
 
-# Module import of openstack control script
-"""
-__location__ = os.path.realpath(
-        os.path.join(os.getcwd(), os.path.dirname(__file__)))
-sys.path.append('../openstack_control')
-import openstack_control
-"""
-
-
 
 def signal_handler(signal, frame):
         print('Aborted. Will shut down all httperf processes')
@@ -87,6 +78,10 @@ class Httperf():
 
         return
 
+    def run_status(self):
+        """Check the status of the running command
+
+
 
 if __name__ == '__main__':
     client = '10.10.10.133'
@@ -96,4 +91,3 @@ if __name__ == '__main__':
     obj = Httperf(client, target)
     obj.run(rate, num_conns)
     print obj
-
