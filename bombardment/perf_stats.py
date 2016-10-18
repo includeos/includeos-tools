@@ -7,29 +7,32 @@ import signal
 
 
 def signal_handler(signal, frame):
-        print('Aborted. Will shut down all httperf processes')
-        for client in Httperf.all_clients:
-            command = 'ssh {0} -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null " \
-                       pkill httperf "'.format(client)
-            subprocess.call(command, shell=True)
-        sys.exit(0)
+    """Used for handling cleanup if the program is aborted    
+    """
+    
+    print('Aborted. Will shut down all httperf processes')
+    for client in Httperf.all_clients:
+        command = ('ssh {0} -q -o StrictHostKeyChecking=no -o '
+                   'UserKnownHostsFile=/dev/null "pkill httperf "'.format(client)
+        subprocess.call(command, shell=True)
+    sys.exit(0)
 signal.signal(signal.SIGINT, signal_handler)
 
 
 class Httperf():
-    """ Contains all httperf related functions
+    """Contains all httperf related functions for running on an external machine.
     """
 
     all_clients = []    # Used for shutting down all process in case of SIGINT
 
     def __init__(self, client, target):
-        """Initialize arguments
+        """Initialize arguments.
 
-        Keyword arguments:
-        client      -- IP to the client where httperf runs
-        target      -- IP to the target getting tested
-        rate        -- Number of connections pr. second (default 500)
-        num_conns   -- Total number of connections (default 5000)
+        Args:
+        client (str): IP to the client where httperf runs
+        target (str): IP to the target getting tested
+        rate (int): Number of connections pr. second (default 500)
+        num_conns (int): Total number of connections (default 5000)
         """
 
         self.client = client
@@ -41,7 +44,9 @@ class Httperf():
         self.reply_rate_avg = 0
 
     def __str__(self):
-        """str function used for printing"""
+        """str function used for printing
+        """
+        
         return ('Client: {x[client]}\n'
                 'Target: {x[target]}\n'
                 'tot_requests: {x[tot_requests]}\n'
@@ -51,11 +56,11 @@ class Httperf():
                 ).format(x=self.__dict__)
 
     def run(self, rate=500, num_conns=5000):
-        """Starts a run of the httperf command
+        """Starts a run of the httperf command.
 
-        Keyword arguments:
-        rate        -- Number of connections pr. second (default 500)
-        num_conns   -- Total number of connections (default 5000)
+        Args:
+        rate (int): Number of connections pr. second (default 500)
+        num_conns (int): Total number of connections (default 5000)
         """
 
         command = ('ssh {0} -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
@@ -78,8 +83,14 @@ class Httperf():
 
         return
 
-    def run_status(self):
-        """Check the status of the running command
+    def is_running(self):
+        """Check the status of the running command on the external machine
+        
+        Returns:
+        True: If there is an httperf command running
+        False: If no httperf command is running
+        """
+        
 
 
 
