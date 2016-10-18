@@ -98,7 +98,35 @@ class Httperf():
             return True
         else:
             return False
+            
+            
+            
 
+def statcalc(clients):
+    """Calculates aggregate statistics from the list of supplied Httperf objects.
+    
+    Args:
+    clients (list[Httperf]): The Httperf objects to calculate statistics from
+    
+    Returns:
+    ..............
+    """
+    
+    num_clients = len(clients)
+    average_conn_rate = 0
+    average_reply_rate_avg = 0
+    
+    for i, client in enumerate(clients):
+        tot_requests += client.tot_requests
+        tot_replies += client.tot_replies
+        aggregate_conn_rate += client.conn_rate
+        average_conn_rate = (average_conn_rate + client.conn_rate) / i
+        aggregate_reply_rate += client.reply_rate_avg 
+        average_reply_rate_avg = (average_reply_rate_avg + client.reply_rate_avg) / i
+        
+    
+        
+        
 
 if __name__ == '__main__':
     client = '10.10.10.133'
