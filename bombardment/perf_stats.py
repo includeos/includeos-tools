@@ -91,7 +91,13 @@ class Httperf():
         False: If no httperf command is running
         """
         
+        command = ('ssh {0} -q -o StrictHostKeyChecking=no -o '
+                   'UserKnownHostsFile=/dev/null "pgrep httperf "'.format(self.client)
 
+        if subprocess.call(command, shell=True) = 0:
+            return True
+        else: 
+            return False
 
 
 if __name__ == '__main__':
