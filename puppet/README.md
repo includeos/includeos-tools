@@ -1,3 +1,9 @@
-This script will install the required packages on your ubuntu system.
+This script will install and configure the required packages for running all the IncludeOS tests on your ubuntu system.
 
-The script first installs a puppet client on the system, then runs the puppet script and the needed packages and configurations are made.
+##Instructions
+
+`./install_puppet_and_test_client.sh`
+
+The script will: 
+- Install a puppet client on the system
+- Run the puppet script to install the required packages
