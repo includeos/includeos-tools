@@ -13,6 +13,9 @@ package { "dnsmasq" :
 package { "g++" :
         ensure => present,
 }
+package { "g++-multilib" :
+        ensure => present,
+}
 service { 'dnsmasq' :
         ensure => running,
         require => Package['dnsmasq'],
