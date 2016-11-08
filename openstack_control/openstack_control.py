@@ -76,11 +76,11 @@ def vm_create(name,
         time.sleep(1)
 
     # Will complete a ping before moving on
-    for x in range(0, 30):
+    for x in range(0, 10):
         try:
             ip = vm_status(name)['network'][1]
             with open(os.devnull, 'wb') as devnull:
-                response = subprocess.check_call(['ping', '-c', '1', ip],
+                response = subprocess.check_call(['ping', '-c', '1', '-W', '3.0', ip],
                                                  stdout=devnull)
             if response == 0:
                 if floating_ip:
