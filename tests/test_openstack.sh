@@ -38,8 +38,6 @@ IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create pull_reque
 echo Instance started on IP: $IP
 sleep 1
 
-IP="10.12.23.55"
-
 # Test ping towards instance
 echo -e "\n\n>>> Testing Host"
 errors=0	# Keep track of errors
