@@ -7,7 +7,7 @@ INCLUDEOS_TOOLS=${INCLUDEOS_TOOLS-~/includeos-tools}
 NAME=pull_request_openstack
 
 # Preemptive checks to see if there is openstack support
-echo -e "\n\n>>> Checking if Openstack is installed"
+echo -e "\n\n>>> Checking if the required Openstack tools are installed"
 errors=0
 nova list > /dev/null 2>&1 || { echo "Nova is required"; errors=$((errors + 1)); }; 
 $INCLUDEOS_TOOLS/openstack_control/openstack_control.py -h > /dev/null 2>&1 || { echo "openstack_control.py is required"; errors=$((errors + 1)); }; 
@@ -23,11 +23,6 @@ function clean {
 	$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --delete $NAME
 }
 trap clean EXIT
-
-# Install IncludeOS
-echo -e "\n\n>>> Installing IncludeOS"
-cd $INCLUDEOS_SRC
-#output=`./install.sh` || echo "$output"
 
 
 # Upload image based on demo service
