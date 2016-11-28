@@ -21,6 +21,7 @@ function clean {
 	echo -e "\n\n>>> Performing clean up"
 	$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --delete_image $NAME
 	$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --delete $NAME
+	echo $errors
 }
 trap clean EXIT
 
@@ -28,10 +29,14 @@ trap clean EXIT
 # Upload image based on demo service
 echo -e "\n\n>>> Creating IncludeOS instance on Openstack"
 cd $INCLUDEOS_SRC/examples/demo_service
+mkdir -p build
+pushd build
+output=`cmake .. 2>&1` || echo "$output"
 output=`make 2>&1` || echo "$output"
+popd 
 
 echo Uploading image to openstack
-$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --upload_image $NAME --image_path ./IncludeOS_Demo_Service.img
+$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --upload_image $NAME --image_path ./build/IncludeOS_example.img
 
 echo Starting instance
 IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create pull_request_openstack --flavor includeos.nano --image $NAME)
