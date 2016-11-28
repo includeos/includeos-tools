@@ -33,17 +33,19 @@ cd $INCLUDEOS_SRC
 # Upload image based on demo service
 echo -e "\n\n>>> Creating IncludeOS instance on Openstack"
 cd $INCLUDEOS_SRC/examples/demo_service
+mkdir -p build
+pushd build
+output=`cmake .. 2>&1` || echo "$output"
 output=`make 2>&1` || echo "$output"
+popd 
 
 echo Uploading image to openstack
-$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --upload_image $NAME --image_path ./IncludeOS_Demo_Service.img
+$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --upload_image $NAME --image_path ./build/IncludeOS_example.img
 
 echo Starting instance
 IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create pull_request_openstack --flavor includeos.nano --image $NAME)
 echo Instance started on IP: $IP
 sleep 1
-
-IP="10.12.23.55"
 
 # Test ping towards instance
 echo -e "\n\n>>> Testing Host"
