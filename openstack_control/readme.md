@@ -7,7 +7,7 @@ This script let's you easily interact with openstack. You can:
 Before running this script you will need:
 - The python novaclient installed
 ```bash
-   sudo apt-get install python-novaclient
+   sudo apt-get install python-novaclient python-glanceclient
 ```
 - Environment variables for authentication set up
 
