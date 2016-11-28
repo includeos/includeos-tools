@@ -21,6 +21,7 @@ function clean {
 	echo -e "\n\n>>> Performing clean up"
 	$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --delete_image $NAME
 	$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --delete $NAME
+	echo $errors
 }
 trap clean EXIT
 
