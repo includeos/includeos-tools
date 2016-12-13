@@ -9,8 +9,11 @@ NAME=pull_request_openstack
 # Preemptive checks to see if there is openstack support
 echo -e "\n\n>>> Checking if the required Openstack tools are installed"
 errors=0
-nova list > /dev/null 2>&1 || { echo "Nova is required"; errors=$((errors + 1)); }; 
-$INCLUDEOS_TOOLS/openstack_control/openstack_control.py -h > /dev/null 2>&1 || { echo "openstack_control.py is required"; errors=$((errors + 1)); }; 
+dpkg -l nova > /dev/null 2>&1 || { echo "Nova is required"; errors=$((errors + 1)); }; 
+if [ ! -f $INCLUDEOS_TOOLS/openstack_control/openstack_control.py ]
+	echo "openstack_control.py is required"
+   	errors=$((errors + 1))  
+fi
 if [ $errors -gt 0 ]; then
 	echo You do not have the required programs for running the Openstack test, Exiting
 	exit 1
