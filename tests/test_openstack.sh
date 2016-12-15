@@ -58,3 +58,4 @@ if [ $errors -gt 0 ]; then
 else
 	echo -e "\nPASS: Openstack deployment successful"
 fi
+exit $errors
