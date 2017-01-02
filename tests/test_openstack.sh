@@ -9,8 +9,11 @@ NAME=pull_request_openstack
 # Preemptive checks to see if there is openstack support
 echo -e "\n\n>>> Checking if the required Openstack tools are installed"
 errors=0
-nova list > /dev/null 2>&1 || { echo "Nova is required"; errors=$((errors + 1)); }; 
-$INCLUDEOS_TOOLS/openstack_control/openstack_control.py -h > /dev/null 2>&1 || { echo "openstack_control.py is required"; errors=$((errors + 1)); }; 
+dpkg -l | grep nova > /dev/null 2>&1 || { echo "Nova is required"; errors=$((errors + 1)); }; 
+if [ ! -f $INCLUDEOS_TOOLS/openstack_control/openstack_control.py ]; then
+	echo "openstack_control.py is required"
+   	errors=$((errors + 1))  
+fi
 if [ $errors -gt 0 ]; then
 	echo You do not have the required programs for running the Openstack test, Exiting
 	exit 1
@@ -39,7 +42,7 @@ echo Uploading image to openstack
 $INCLUDEOS_TOOLS/openstack_control/openstack_control.py --upload_image $NAME --image_path ./build/IncludeOS_example.img
 
 echo Starting instance
-IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create pull_request_openstack --flavor includeos.nano --image $NAME)
+IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create pull_request_openstack --flavor includeos.nano --image $NAME --network FloatingPool01)
 echo Instance started on IP: $IP
 sleep 1
 
@@ -55,3 +58,4 @@ if [ $errors -gt 0 ]; then
 else
 	echo -e "\nPASS: Openstack deployment successful"
 fi
+exit $errors

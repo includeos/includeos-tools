@@ -16,6 +16,12 @@ package { "g++" :
 package { "g++-multilib" :
         ensure => present,
 }
+package { "python-psutil" :
+        ensure => present,
+}
+package { "grub2" :
+        ensure => present,
+}
 service { 'dnsmasq' :
         ensure => running,
         require => Package['dnsmasq'],
