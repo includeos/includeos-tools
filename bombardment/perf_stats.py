@@ -128,13 +128,13 @@ def statcalc(clients):
         results['aggregate_reply_rate'] += client.reply_rate_avg
         results['average_reply_rate_avg'] = (results['average_reply_rate_avg'] + client.reply_rate_avg) / (i+1)
 
-    print results
+    return results
 
 
 if __name__ == '__main__':
-    client = '10.10.10.133'
-    client2 = '10.10.10.112'
-    target = '10.10.10.124'
+    client = '10.10.10.132'
+    client2 = '10.10.10.134'
+    target = '10.10.10.135'
     rate = 200
     num_conns = 2000
     obj = Httperf(client, target)
@@ -142,4 +142,4 @@ if __name__ == '__main__':
     x = [obj, obj2]
 
     map(lambda y: y.run(rate, num_conns), x)
-    statcalc(x)
+    print statcalc(x)
