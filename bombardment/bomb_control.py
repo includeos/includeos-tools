@@ -10,7 +10,7 @@ def target_status(target):
     """ Finds the status of the target"""
 
     try:
-        return_code = urllib2.urlopen('http://'+target, timeout=2).getcode()
+        return_code = urllib2.urlopen('http://'+target[0]+'/'+target[1], timeout=2).getcode()
         return True
     except urllib2.URLError:
         # Timed out
@@ -37,17 +37,38 @@ def find_breaking_point(client, target):
     """ Will increase the intensity of the test
     """
 
-    obj = perfs.Httperf(client, target)
+    obj = perfs.Httperf(client, target[0])
 
-    rate = 1500
-    for test in range(10):
+    rate = 2000
+    start_rate_diff = 500
+    rate_diff = start_rate_diff
+    num_conn_multiplier = 10 # How many times the rate
+    timeout = 1
+    percent_lost = 1
+    retry_count = 0
+
+    while True:
         if target_status(target):
-            print "Running test ", test
-            rate += 200
-            num_conns = rate * 2
-            obj.run(rate, num_conns)
+            num_conns = rate * num_conn_multiplier
+            obj.run(rate, num_conns, timeout, target[1])
             x = [obj]
-            print perfs.statcalc(x)
+
+            # Check if too much is lost
+            if perfs.statcalc(x)['percent_lost'] > percent_lost:
+                print "More than {} percent lost".format(percent_lost)
+                print "rate: {aggregate_conn_rate} wanted rate: {0}".format(rate, **perfs.statcalc(x))
+                rate -= rate_diff
+                rate_diff = rate_diff/2
+                if rate_diff < 10:
+                    print "Now done. Final rate: {aggregate_conn_rate}".format(**perfs.statcalc(x))
+                    break
+                print "New rate {}".format(rate)
+
+            else:
+                rate += rate_diff
+        else:
+            print "Target no longer responds"
+            break
 
 def main():
     """ Main function
@@ -55,7 +76,8 @@ def main():
 
     client = '10.10.10.132'
     client2 = '10.10.10.134'
-    target = ostack.vm_status('bomb_target')['network'][1]
+    target = [ostack.vm_status('bomb_target')['network'][1], 'index.html']
+    #target = '10.10.10.138'
     rate = 200
     num_conns = 2000
     obj = perfs.Httperf(client, target)
@@ -67,7 +89,12 @@ def main():
     print perfs.statcalc(x)
     """
 
+    print "IncludeOS"
     find_breaking_point(client, target)
+    print
+    print "nginx"
+    target = ['10.10.10.138', 'output.txt']
+    find_breaking_point(client2, target)
 
 
 
