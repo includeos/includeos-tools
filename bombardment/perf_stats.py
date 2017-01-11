@@ -55,7 +55,7 @@ class Httperf():
                 'reply_rate_avg: {x[reply_rate_avg]}\n'
                 ).format(x=self.__dict__)
 
-    def run(self, rate=500, num_conns=5000):
+    def run(self, rate=500, num_conns=5000, timeout=20, uri='index.html'):
         """Starts a run of the httperf command.
 
         Args:
@@ -64,8 +64,8 @@ class Httperf():
         """
 
         command = ('ssh {0} -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
-                   '"httperf --hog --server {1} --num-conns {2} --rate {3}" '
-                   ).format(self.client, self.target, num_conns, rate)
+                   '"httperf --hog --server {1} --uri /{5} --num-conns {2} --rate {3} --timeout {4}" '
+                   ).format(self.client, self.target, num_conns, rate, timeout, uri)
 
         # Run the command
         result = subprocess.check_output(command, stderr=subprocess.PIPE, shell=True)
@@ -127,6 +127,8 @@ def statcalc(clients):
         results['average_conn_rate'] = (results['average_conn_rate'] + client.conn_rate) / (i+1)
         results['aggregate_reply_rate'] += client.reply_rate_avg
         results['average_reply_rate_avg'] = (results['average_reply_rate_avg'] + client.reply_rate_avg) / (i+1)
+
+    results['percent_lost'] = (results['tot_requests'] - results['tot_replies']) / results['tot_requests'] * 100.0
 
     return results
 
