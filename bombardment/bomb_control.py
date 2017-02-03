@@ -6,7 +6,7 @@ import urllib2
 sys.path.insert(0, "../openstack_control")
 import openstack_control as ostack
 
-def target_status(target):
+def target_active(target):
     """ Finds the status of the target"""
 
     try:
@@ -32,39 +32,44 @@ def target_restart():
     return ostack.vm_status("bomb_target")['network'][1]
 
 
-
 def find_breaking_point(client, target):
     """ Will increase the intensity of the test
     """
 
+    # Create httperf object which deals with running httperf on external
+    # machine
     obj = perfs.Httperf(client, target[0])
 
-    rate = 2000
-    start_rate_diff = 500
-    rate_diff = start_rate_diff
-    num_conn_multiplier = 10 # How many times the rate
-    timeout = 1
-    percent_lost = 1
+    # Config options for the test
+    rate = 5000 # start rate
+    start_rate_diff = 2000   # How much to start increasing rate by
+    rate_diff = start_rate_diff # rate_diff is changed over time
+    num_conn_multiplier = 10 # number of connections compared to rate
+    timeout = 20
+    percent_lost = 1    # Limit for when to fail the test
     retry_count = 0
 
     while True:
-        if target_status(target):
-            num_conns = rate * num_conn_multiplier
+        if target_active(target):
+            num_conns = rate * num_conn_multiplier  # New for every loop
+
+            print "rate: {0}".format(rate)
+
+            # Run the httperf test
             obj.run(rate, num_conns, timeout, target[1])
             x = [obj]
 
             # Check if too much is lost
             if perfs.statcalc(x)['percent_lost'] > percent_lost:
-                print "More than {} percent lost".format(percent_lost)
-                print "rate: {aggregate_conn_rate} wanted rate: {0}".format(rate, **perfs.statcalc(x))
-                rate -= rate_diff
-                rate_diff = rate_diff/2
-                if rate_diff < 10:
+                # Calculate new rate
+                rate -= rate_diff   # Subtract rate diff
+                print "Rate subtract: -{0}".format(rate_diff)
+                rate_diff = rate_diff/2 # Halve the rate_diff for next time
+                if rate_diff < 70:
                     print "Now done. Final rate: {aggregate_conn_rate}".format(**perfs.statcalc(x))
                     break
-                print "New rate {}".format(rate)
-
             else:
+                # Increase the rate if no packages are lost
                 rate += rate_diff
         else:
             print "Target no longer responds"
@@ -77,24 +82,28 @@ def main():
     client = '10.10.10.132'
     client2 = '10.10.10.134'
     target = [ostack.vm_status('bomb_target')['network'][1], 'index.html']
-    #target = '10.10.10.138'
-    rate = 200
-    num_conns = 2000
-    obj = perfs.Httperf(client, target)
+    target = ['10.10.10.148', 'index.html']
+
+    find_breaking_point(client2, target)
+
+
+    """
     obj2 = perfs.Httperf(client2, target)
     x = [obj, obj2]
-    """
 
     map(lambda y: y.run(rate, num_conns), x)
     print perfs.statcalc(x)
-    """
-
     print "IncludeOS"
-    find_breaking_point(client, target)
+    #find_breaking_point(client, target)
+    obj.run(100,1000)
     print
+    print "IncludeOS 2"
+    target = ['10.10.10.137', 'index.html']
+    find_breaking_point(client2, target)
     print "nginx"
     target = ['10.10.10.138', 'output.txt']
     find_breaking_point(client2, target)
+    """
 
 
 

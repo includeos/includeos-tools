@@ -4,6 +4,7 @@ import subprocess
 import re
 import sys
 import signal
+import threading
 
 
 def signal_handler(signal, frame):
@@ -37,11 +38,14 @@ class Httperf():
 
         self.client = client
         self.all_clients.append(client)
+        self.failed = False
         self.target = target
         self.tot_requests = 0
         self.tot_replies = 0
         self.conn_rate = 0
         self.reply_rate_avg = 0
+        self.shutdown_httperf_command = ('ssh {0} -q -o StrictHostKeyChecking=no -o '
+                                         'UserKnownHostsFile=/dev/null "pkill httperf "').format(self.client)
 
     def __str__(self):
         """str function used for printing
@@ -67,15 +71,35 @@ class Httperf():
                    '"httperf --hog --server {1} --uri /{5} --num-conns {2} --rate {3} --timeout {4}" '
                    ).format(self.client, self.target, num_conns, rate, timeout, uri)
 
-        # Run the command
-        result = subprocess.check_output(command, stderr=subprocess.PIPE, shell=True)
+        def target():
+            # httperf command is run here
+            self.process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+            self.process.wait()
+
+        # Start httperf command in thread so that it can be canceled due to
+        # timeout
+        thread = threading.Thread(target=target)
+        thread.start()
+        thread.join(timeout)
+        if thread.is_alive():
+            # Kill local ssh command that started httperf
+            self.process.send_signal(signal.SIGINT)
+
+            # Kill remote httperf process
+            subprocess.call(self.shutdown_httperf_command, shell=True)
+
+            thread.join()
+            self.failed = True
+            return
 
         # Process output
+        result = self.process.communicate()[0]
         regex = ("requests (?P<tot_requests>\S*) replies (?P<tot_replies>\S*) test(.|\n)*"
                  "Connection rate: (?P<conn_rate>\S*) conn/s (.|\n)*"
                  ".*replies/s]: min \S* avg (?P<reply_rate_avg>\S*) max")
         output = re.search(regex, result)
 
+        self.failed = False
         self.tot_requests = float(output.group('tot_requests'))
         self.tot_replies = float(output.group('tot_replies'))
         self.conn_rate = float(output.group('conn_rate'))
@@ -128,7 +152,10 @@ def statcalc(clients):
         results['aggregate_reply_rate'] += client.reply_rate_avg
         results['average_reply_rate_avg'] = (results['average_reply_rate_avg'] + client.reply_rate_avg) / (i+1)
 
-    results['percent_lost'] = (results['tot_requests'] - results['tot_replies']) / results['tot_requests'] * 100.0
+    if not client.failed:
+        results['percent_lost'] = (results['tot_requests'] - results['tot_replies']) / results['tot_requests'] * 100.0
+    else:
+        results['percent_lost'] = 100
 
     return results
 
@@ -136,12 +163,16 @@ def statcalc(clients):
 if __name__ == '__main__':
     client = '10.10.10.132'
     client2 = '10.10.10.134'
-    target = '10.10.10.135'
+    target = '10.10.10.137'
     rate = 200
-    num_conns = 2000
+    num_conns = 20000
     obj = Httperf(client, target)
     obj2 = Httperf(client2, target)
     x = [obj, obj2]
+    y = [obj]
+    y[0].run(rate, num_conns, timeout=3)
+    print statcalc(y)
 
-    map(lambda y: y.run(rate, num_conns), x)
-    print statcalc(x)
+
+    #map(lambda y: y.run(rate, num_conns), x)
+    #print statcalc(x)
