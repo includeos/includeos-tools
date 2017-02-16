@@ -19,4 +19,4 @@ $INCLUDEOS_SRC/etc/install_build_requirements.sh $SYSTEM $RELEASE
 $INCLUDEOS_SRC/etc/scripts/create_bridge.sh
 
 # Install python package
-$INCLUDEOS_SRC/etc/install_vmrunner.py
+$INCLUDEOS_SRC/etc/install_vmrunner.sh
