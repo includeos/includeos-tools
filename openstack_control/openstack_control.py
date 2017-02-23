@@ -99,19 +99,21 @@ def vm_create(name,
 def vm_delete(name):
     """ Deletes a VM """
 
-    # print "vm_delete: Will delete VM: {0}".format(name)
-    try:
-        vm_status(name)['server'].delete()
-    except TypeError:
-        return
-        # print "vm_delete: No VM to delete: {0}".format(name)
-
-    # Will not exit until vm is truely gone
     while True:
         try:
-            vm_status(name)['server']
+            vm_id = vm_status(name)['id']   # Find vm ID
+            vm_status(name)['server'].delete()
         except TypeError:
             return
+
+        # Will not exit until vm is truely gone
+        while True:
+            try:
+                vm_new_id = vm_status(name)['id']
+                if vm_id is not vm_new_id:  # New vm with same name, but different ID
+                    break
+            except TypeError:
+                break
 
 
 def vm_status(name):
