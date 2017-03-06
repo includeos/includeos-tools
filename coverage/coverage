@@ -7,7 +7,7 @@ if [ $LEAF = "IncludeOS/test" ]; then
 	cmake .. -DCOVERAGE=ON
 	make && ./unittests
 	lcov -c -d . -o cov.info
-	lcov -r cov.info '*/unit/**' '*/usr/include/*' '*/lest/*' '*lest_util*' '*mod/GSL/*' -o cov2.info
+  lcov -r cov.info '*/unit/**' '*/usr/include/*' '*/lest/*' '*lest_util*' '*mod/GSL/*' '*mod/http-parser/*' -o cov2.info
 	genhtml cov2.info -o cov
 	echo "Open coverage/cov/index.html in a browser to see coverage info"
 
