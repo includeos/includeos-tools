@@ -46,9 +46,16 @@ if [ "$timeout" -gt 30 ]; then
 fi
 
 ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
+		 export CC="clang-3.8"
+		 export CXX="clang++-3.8"
+		 export INCLUDEOS_SRC=~/workspace
+		 export INCLUDEOS_PREFIX=~/workspace/IncludeOS_install
+
 		 mkdir workspace; cd workspace
 		 wget -q 10.10.10.125:8080/built.tar.gz
 		 tar -zxf built.tar.gz
+
+		 ~/includeos-tools/install/install_only_dependencies.sh
 		 cd test
 		 ./testrunner.py -t intrusive'
 
