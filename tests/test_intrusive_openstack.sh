@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 echo -e ">>> Running Intrusive Test"
 
@@ -35,15 +34,29 @@ IP="$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --f
 echo Instance started on IP: $IP
 
 timeout=0
-until ssh -q $IP exit || [ "$timeout" -gt 30 ]
+until ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP exit || [ "$timeout" -gt 30 ]
 do
 	sleep 1
 	timeout=$((timeout+1))
 done
 
+if [ "$timeout" -gt 30 ]; then
+	echo No connection made to instance, Exiting
+	exit 1
+fi
 
-ssh $IP 'mkdir workspace; cd workspace
+ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
+		 mkdir workspace; cd workspace
 		 wget -q 10.10.10.125:8080/built.tar.gz
 		 tar -zxf built.tar.gz
 		 cd test
 		 ./testrunner.py -t intrusive'
+
+errors=$?
+# Exit
+if [ $errors -gt 0 ]; then
+    echo -e "\nERROR: Intrusive tests did not pass"
+else
+    echo -e "\nPASS: Intrusive tests successful"
+fi
+exit $errors
