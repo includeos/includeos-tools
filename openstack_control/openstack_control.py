@@ -76,7 +76,7 @@ def vm_create(name,
         time.sleep(1)
 
     # Will complete a ping before moving on
-    for x in range(0, 10):
+    for x in range(0, 15):
         try:
             ip = vm_status(name)['network'][1]
             with open(os.devnull, 'wb') as devnull:
@@ -114,6 +114,8 @@ def vm_delete(name):
                     break
             except TypeError:
                 break
+            time.sleep(1)
+        time.sleep(1)
 
 
 def vm_status(name):
