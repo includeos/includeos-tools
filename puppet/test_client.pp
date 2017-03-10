@@ -7,6 +7,9 @@ package { "arping" :
 package { "python-jsonschema" :
         ensure => present,
 }
+package { "python-junit.xml" :
+        ensure => present,
+}
 package { "dnsmasq" :
         ensure => present,
 }
