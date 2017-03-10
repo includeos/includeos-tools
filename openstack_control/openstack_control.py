@@ -73,7 +73,7 @@ def vm_create(name,
             status = vm_status(name)['status']
         except TypeError:
             continue
-        time.sleep(1)
+        time.sleep(2)
 
     # Will complete a ping before moving on
     for x in range(0, 15):
@@ -87,10 +87,8 @@ def vm_create(name,
                     associate_floating_ip(name, floating_ip)
                 return
         except:
+            time.sleep(1)
             continue
-        time.sleep(0.5)
-
-    print floating_ip
 
     print "Error: Instance did not respond to ping"
     sys.exit(1)
@@ -111,11 +109,11 @@ def vm_delete(name):
             try:
                 vm_new_id = vm_status(name)['id']
                 if vm_id is not vm_new_id:  # New vm with same name, but different ID
+                    time.sleep(5)
                     break
             except TypeError:
+                time.sleep(1)
                 break
-            time.sleep(1)
-        time.sleep(1)
 
 
 def vm_status(name):
