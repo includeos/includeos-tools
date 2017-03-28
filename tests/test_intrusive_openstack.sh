@@ -51,6 +51,13 @@ ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
 		 export INCLUDEOS_SRC=~/workspace
 		 export INCLUDEOS_PREFIX=~/workspace/IncludeOS_install
 
+		 ps aux | grep "apt-get -qq" | grep -v bash | grep -v grep
+
+		 until [ $? -ne 0 ]; do
+			 sleep 1
+			 ps aux | grep "apt-get -qq" | grep -v bash | grep -v grep
+		 done
+
 		 mkdir workspace; cd workspace
 		 wget -q 10.10.10.125:8080/built.tar.gz
 		 tar -zxf built.tar.gz
