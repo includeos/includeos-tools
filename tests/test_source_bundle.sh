@@ -1,12 +1,10 @@
 #!/bin/bash
 
-echo -e ">>> Running Intrusive Test"
+echo -e ">>> Running source build test"
 
 INCLUDEOS_SRC=${INCLUDEOS_SRC-~/IncludeOS}
 INCLUDEOS_TOOLS=${INCLUDEOS_TOOLS-~/includeos-tools}
-NAME=pull_request_intrusive
-IMAGE_NAME=intrusive-snapshot
-KEY_PAIR_NAME="pr_openstack"
+NAME=build_source_instance
 
 # Preemptive checks to see if there is openstack support
 echo -e "\n\n>>> Checking if the required Openstack tools are installed"
@@ -29,8 +27,9 @@ function clean {
 }
 trap clean EXIT
 
-echo Starting instance
-IP="$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor g1.small --image $IMAGE_NAME --key_pair "$KEY_PAIR_NAME")"
+# Boot new instance
+echo Booting new intance
+IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor g1.large)
 echo Instance started on IP: $IP
 
 timeout=0
@@ -45,32 +44,21 @@ if [ "$timeout" -gt 30 ]; then
 	exit 1
 fi
 
-ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
-		 export CC="clang-3.8"
-		 export CXX="clang++-3.8"
-		 export INCLUDEOS_SRC=~/workspace
-		 export INCLUDEOS_PREFIX=~/workspace/IncludeOS_install
+# Download necessary tools on remote machine
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
+	export CC=clang-3.8
+	export CXX=clang++-3.8
+	export INCLUDEOS_SRC=~/IncludeOS
+	export INCLUDEOS_PREFIX=~/IncludeOS_install
+	export binutils_version='"'$binutils_version'"' 
+	export newlib_version='"'$newlib_version'"' 
+	export gcc_version='"'$gcc_version'"' 
+	export clang_version='"'$clang_version'"' 
+	export LLVM_TAG='"'$LLVM_TAG'"'
+	export num_jobs="-j"
 
-		 ps aux | grep "apt-get -qq" | grep -v bash | grep -v grep
-
-		 until [ $? -ne 0 ]; do
-			 sleep 1
-			 ps aux | grep "apt-get -qq" | grep -v bash | grep -v grep
-		 done
-
-		 mkdir workspace; cd workspace
-		 wget -q 10.10.10.125:8080/built.tar.gz
-		 tar -zxf built.tar.gz
-
-		 ~/includeos-tools/install/install_only_dependencies.sh
-		 cd test
-		 ./testrunner.py -t intrusive'
-
-errors=$?
-# Exit
-if [ $errors -gt 0 ]; then
-    echo -e "\nERROR: Intrusive tests did not pass"
-else
-    echo -e "\nPASS: Intrusive tests successful"
-fi
-exit $errors
+	git clone https://github.com/mnordsletten/IncludeOS.git
+	cd IncludeOS/etc
+	git checkout bundle_creation
+	./create_binary_bundle.sh
+'
