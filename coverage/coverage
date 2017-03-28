@@ -4,7 +4,7 @@ LEAF=$(pwd | awk -F\/ '{print $(NF-1) "/" $(NF)}')
 
 if [ $LEAF = "IncludeOS/test" ]; then
 	mkdir coverage && cd coverage
-	cmake .. -DCOVERAGE=ON
+	cmake .. -DCOVERAGE=ON -DEXTRA_TESTS=ON
 	make && ./unittests
 	lcov -c -d . -o cov.info
   lcov -r cov.info '*/unit/**' '*/usr/include/*' '*/lest/*' '*lest_util*' '*mod/GSL/*' '*mod/http-parser/*' '*mod/uzlib/src/*' -o cov2.info
