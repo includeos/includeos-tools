@@ -231,7 +231,7 @@ def image_delete(name):
     """ Will delete the specified image """
     for i in range(5):
         try:
-            image = nova.images.find(name=image)
+            image = nova.images.find(name=name)
             break
         except novaclient.exceptions.ClientException as e:
             if i == 4:
