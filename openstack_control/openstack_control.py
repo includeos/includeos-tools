@@ -50,8 +50,27 @@ def vm_create(name,
 
     nics = [{"net-id": nova.networks.find(label=network).id,
              "v4-fixed-ip": ''}]
-    image = nova.images.find(name=image)
-    flavor = nova.flavors.find(name=flavor)
+    for i in range(5):
+        try:
+            image = nova.images.find(name=image)
+            break
+        except novaclient.exceptions.ClientException as e:
+            if i == 4:
+                print e
+                print "Error with Openstack, report to your local sysadm"
+                sys.exit(1)
+            continue
+
+    for i in range(5):
+        try:
+            flavor = nova.flavors.find(name=flavor)
+            break
+        except novaclient.exceptions.ClientException as e:
+            if i == 4:
+                print e
+                print "Error with Openstack, report to your local sysadm"
+                sys.exit(1)
+            continue
 
     # Using key pair is not required if booting IncludeOS images
     if key_pair == 'IncludeOS':
@@ -210,7 +229,16 @@ def image_upload(name, imagefile):
 
 def image_delete(name):
     """ Will delete the specified image """
-    image = nova.images.find(name=name)
+    for i in range(5):
+        try:
+            image = nova.images.find(name=image)
+            break
+        except novaclient.exceptions.ClientException as e:
+            if i == 4:
+                print e
+                print "Error with Openstack, report to your local sysadm"
+                sys.exit(1)
+            continue
     glance.images.delete(image.id)
 
 
