@@ -46,25 +46,26 @@ if [ "$timeout" -gt 30 ]; then
 fi
 
 ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
-		 export CC="clang-3.8"
-		 export CXX="clang++-3.8"
-		 export INCLUDEOS_SRC=~/workspace
-		 export INCLUDEOS_PREFIX=~/workspace/IncludeOS_install
+	export CC="clang-3.8"
+	export CXX="clang++-3.8"
+	export INCLUDEOS_SRC=~/workspace
+	export INCLUDEOS_PREFIX=~/workspace/IncludeOS_install
+	git clone https://github.com/includeos/includeos-tools.git
 
-		 ps aux | grep "apt-get -qq" | grep -v bash | grep -v grep
+	mkdir workspace; cd workspace
+	wget -q 10.10.10.125:8080/built.tar.gz
+	tar -zxf built.tar.gz
 
-		 until [ $? -ne 0 ]; do
-			 sleep 1
-			 ps aux | grep "apt-get -qq" | grep -v bash | grep -v grep
-		 done
+	pgrep "apt-get"
 
-		 mkdir workspace; cd workspace
-		 wget -q 10.10.10.125:8080/built.tar.gz
-		 tar -zxf built.tar.gz
+	until [ $? -ne 0 ]; do
+		 sleep 1
+		 pgrep "apt-get"
+	done
 
-		 ~/includeos-tools/install/install_only_dependencies.sh
-		 cd test
-		 ./testrunner.py -t intrusive'
+	~/includeos-tools/install/install_only_dependencies.sh
+	cd test
+	./testrunner.py -t intrusive'
 
 errors=$?
 # Exit

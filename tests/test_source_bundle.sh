@@ -5,6 +5,7 @@ echo -e ">>> Running source build test"
 INCLUDEOS_SRC=${INCLUDEOS_SRC-~/IncludeOS}
 INCLUDEOS_TOOLS=${INCLUDEOS_TOOLS-~/includeos-tools}
 NAME=build_source_instance
+KEY_PAIR="pr_openstack"
 
 # Preemptive checks to see if there is openstack support
 echo -e "\n\n>>> Checking if the required Openstack tools are installed"
@@ -29,7 +30,7 @@ trap clean EXIT
 
 # Boot new instance
 echo Booting new intance
-IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor g1.large)
+IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor g1.large --key_pair $KEY_PAIR)
 echo Instance started on IP: $IP
 
 timeout=0
