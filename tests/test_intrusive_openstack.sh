@@ -30,7 +30,8 @@ function clean {
 trap clean EXIT
 
 echo Starting instance
-IP="$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor g1.small --image $IMAGE_NAME --key_pair "$KEY_PAIR_NAME")"
+IP="$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor g1.small --image $IMAGE_NAME --key_pair "$KEY_PAIR_NAME"
+--should_work)"
 echo Instance started on IP: $IP
 
 timeout=0
