@@ -38,7 +38,8 @@ def vm_create(name,
               key_pair=Config.get('Openstack', 'key_pair'),
               flavor=Config.get('Openstack', 'flavor'),
               network=Config.get('Openstack', 'network'),
-              floating_ip=None):
+              floating_ip=None,
+              should_work=False):
     """ Creates a VM
 
     name = Name of VM
@@ -52,36 +53,36 @@ def vm_create(name,
              "v4-fixed-ip": ''}]
     for i in range(5):
         try:
-            image = nova.images.find(name=image)
+            nova_image = nova.images.find(name=image)
             break
         except novaclient.exceptions.ClientException as e:
             if i == 4:
                 print e
-                print "Error with Openstack, report to your local sysadm"
+                print "Error with Openstack in nova.images.find, report to your local sysadm"
                 sys.exit(1)
             continue
 
     for i in range(5):
         try:
-            flavor = nova.flavors.find(name=flavor)
+            nova_flavor = nova.flavors.find(name=flavor)
             break
         except novaclient.exceptions.ClientException as e:
             if i == 4:
                 print e
-                print "Error with Openstack, report to your local sysadm"
+                print "Error with Openstack in nova.flavors.find, report to your local sysadm"
                 sys.exit(1)
             continue
 
     # Using key pair is not required if booting IncludeOS images
     if key_pair == 'IncludeOS':
         nova.servers.create(name,
-                            image=image,
-                            flavor=flavor,
+                            image=nova_image,
+                            flavor=nova_flavor,
                             nics=nics)
     else:
         nova.servers.create(name,
-                            image=image,
-                            flavor=flavor,
+                            image=nova_image,
+                            flavor=nova_flavor,
                             nics=nics,
                             key_name=key_pair)
 
@@ -108,6 +109,11 @@ def vm_create(name,
         except:
             time.sleep(1)
             continue
+
+    if should_work:
+        vm_delete(name)
+        should_work = False
+        vm_create(name, image, key_pair, flavor, network, floating_ip, should_work)
 
     print "Error: Instance did not respond to ping"
     sys.exit(1)
@@ -233,11 +239,13 @@ def image_delete(name):
         try:
             image = nova.images.find(name=name)
             break
+        except novaclient.exceptions.NotFound:
+            return
         except novaclient.exceptions.ClientException as e:
             if i == 4:
                 print e
-                print "Error with Openstack, report to your local sysadm"
-                sys.exit(1)
+                print "Error with Openstack img_del nova.images.find, report to your local sysadm"
+                return
             continue
     glance.images.delete(image.id)
 
@@ -310,6 +318,9 @@ def main():
                         const=Config.get('Openstack', 'floating_ip'),
                         default=None,
                         help="Will associate with a floating ip")
+    parser.add_argument("--should_work", action='store_true',
+                        dest="should_work",
+                        help="Will cause the spawn to retry once if failed")
 
     # Calling functions
     group = parser.add_mutually_exclusive_group(required=True)
@@ -345,7 +356,7 @@ def main():
     elif args.cmd is vm_create:
         args.cmd(args.name, image=args.image, flavor=args.flavor,
                  key_pair=args.key_pair, network=args.network,
-                 floating_ip=args.floating_ip)
+                 floating_ip=args.floating_ip, should_work=args.should_work)
         print vm_status(args.name)['network'][1]
     elif args.cmd is vm_status:
         status = vm_status(args.name)
