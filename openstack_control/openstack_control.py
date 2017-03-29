@@ -74,17 +74,26 @@ def vm_create(name,
             continue
 
     # Using key pair is not required if booting IncludeOS images
-    if key_pair == 'IncludeOS':
-        nova.servers.create(name,
-                            image=nova_image,
-                            flavor=nova_flavor,
-                            nics=nics)
-    else:
-        nova.servers.create(name,
-                            image=nova_image,
-                            flavor=nova_flavor,
-                            nics=nics,
-                            key_name=key_pair)
+    for i in range(5):
+        try:
+            if key_pair == 'IncludeOS':
+                nova.servers.create(name,
+                                    image=nova_image,
+                                    flavor=nova_flavor,
+                                    nics=nics)
+            else:
+                nova.servers.create(name,
+                                    image=nova_image,
+                                    flavor=nova_flavor,
+                                    nics=nics,
+                                    key_name=key_pair)
+            break
+        except novaclient.exceptions.ClientException as e:
+            if i == 4:
+                print e
+                print "Error with Openstack in nova.servers.create, report to your local sysadm"
+                sys.exit(1)
+            continue
 
     # Won't exit before the server is active
     status = ''

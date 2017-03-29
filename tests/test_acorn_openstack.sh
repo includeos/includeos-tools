@@ -42,8 +42,7 @@ echo Uploading image to openstack
 $INCLUDEOS_TOOLS/openstack_control/openstack_control.py --upload_image $NAME --image_path ./build/acorn.img
 
 echo Starting instance
-IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor includeos.nano --image $NAME --network FloatingPool01
---should_work)
+IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor includeos.nano --image $NAME --network FloatingPool01 --should_work)
 echo Instance started on IP: $IP
 sleep 1
 
