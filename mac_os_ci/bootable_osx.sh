@@ -33,8 +33,8 @@ exit_all() {
   exit 2
 }
 
-trap detach_all EXIT
-trap exit_all ERR
+#trap detach_all EXIT
+#trap exit_all ERR
 
 echo +++ Trying to unmount anything from previous run
 detach_all
@@ -52,14 +52,16 @@ hdiutil attach "$IMGNAME".cdr.dmg -noverify -nobrowse -mountpoint "$MPIMG"
 echo +++ Populate the contents of the new drive
 asr restore -source "$MPAPP"/BaseSystem.dmg -target "$MPIMG" -noprompt -noverify -erase
 
+ls -l /Volumes/*
+
 echo +++ Removed unused link
-rm /Volumes/OS\ X\ Base\ System/System/Installation/Packages
-rm "$MPBASE"/System/Installation/Packages
+#rm /Volumes/OS\ X\ Base\ System/System/Installation/Packages
+#rm "$MPBASE"/System/Installation/Packages
 
 echo +++ Copy files 
-cp -rp "$MPAPP"/Packages "$MPBASE"/System/Installation
-cp -rp "$MPAPP"/BaseSystem.chunklist "$MPBASE"
-cp -rp "$MPAPP"/BaseSystem.dmg "$MPBASE"
+cp -Rp "$MPAPP"/Packages/* "$MPBASE/System/Installation"
+cp -Rp "$MPAPP"/BaseSystem.chunklist "$MPBASE"
+cp -Rp "$MPAPP"/BaseSystem.dmg "$MPBASE"
 
 echo +++ detach volumes
 hdiutil detach "$MPAPP"
