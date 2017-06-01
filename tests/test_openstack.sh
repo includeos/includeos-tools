@@ -9,11 +9,7 @@ NAME=pull_request_openstack
 # Preemptive checks to see if there is openstack support
 echo -e "\n\n>>> Checking if the required Openstack tools are installed"
 errors=0
-dpkg -l | grep nova > /dev/null 2>&1 || { echo "Nova is required"; errors=$((errors + 1)); }; 
-if [ ! -f $INCLUDEOS_TOOLS/openstack_control/openstack_control.py ]; then
-	echo "openstack_control.py is required"
-   	errors=$((errors + 1))  
-fi
+which openstack > /dev/null 2>&1 || { echo "Openstack cli is required"; errors=$((errors + 1)); }; 
 if [ $errors -gt 0 ]; then
 	echo You do not have the required programs for running the Openstack test, Exiting
 	exit 1
@@ -22,8 +18,8 @@ fi
 # Create trap to ensure clean up
 function clean {
 	echo -e "\n\n>>> Performing clean up"
-	$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --delete_image $NAME
-	$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --delete $NAME
+	openstack server delete $NAME --wait
+	openstack image delete $NAME
 	echo $errors
 }
 trap clean EXIT
@@ -39,10 +35,11 @@ output=`make 2>&1` || echo "$output"
 popd 
 
 echo Uploading image to openstack
-$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --upload_image $NAME --image_path ./build/IncludeOS_example.img
+openstack image create --file ./build/IncludeOS_example.img --property hw_disk_bus=ide $NAME
 
 echo Starting instance
-IP=$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor includeos.nano --image $NAME --network FloatingPool01 --should_work)
+openstack server create --image $NAME --flavor tiny $NAME --wait
+IP=$(openstack server list -c Networks -f value --name $NAME | cut -d " " -f 2)
 echo Instance started on IP: $IP
 sleep 1
 
