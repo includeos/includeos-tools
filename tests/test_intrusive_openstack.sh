@@ -47,20 +47,13 @@ ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
 	export CXX="clang++-3.8"
 	export INCLUDEOS_SRC=~/workspace
 	export INCLUDEOS_PREFIX=~/workspace/IncludeOS_install
-	git clone https://github.com/includeos/includeos-tools.git
+	export INCLUDEOS_ENABLE_TEST=ON
 
-	mkdir workspace; cd workspace
-	wget -q 192.168.0.18:8080/built.tar.gz
-	tar -zxf built.tar.gz
+	git clone https://github.com/hioa-cs/IncludeOS.git
+	cd IncludeOS
+	git checkout dev
+	./install.sh
 
-	pgrep "apt-get"
-
-	until [ $? -ne 0 ]; do
-		 sleep 1
-		 pgrep "apt-get"
-	done
-
-	~/includeos-tools/install/install_only_dependencies.sh
 	cd test
 	./testrunner.py -t intrusive'
 
