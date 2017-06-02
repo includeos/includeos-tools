@@ -45,8 +45,8 @@ fi
 ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
 	export CC="clang-3.8"
 	export CXX="clang++-3.8"
-	export INCLUDEOS_SRC=~/workspace
-	export INCLUDEOS_PREFIX=~/workspace/IncludeOS_install
+	export INCLUDEOS_SRC=~/IncludeOS
+	export INCLUDEOS_PREFIX=~/IncludeOS_install
 	export INCLUDEOS_ENABLE_TEST=ON
 
 	git clone https://github.com/hioa-cs/IncludeOS.git
