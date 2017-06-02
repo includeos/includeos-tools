@@ -6,7 +6,7 @@ INCLUDEOS_SRC=${INCLUDEOS_SRC-~/IncludeOS}
 INCLUDEOS_TOOLS=${INCLUDEOS_TOOLS-~/includeos-tools}
 NAME=intrusive_test_nightly
 IMAGE_NAME=ubuntu16.04
-KEY_PAIR_NAME="master"
+KEY_PAIR_NAME="pipe_openstack"
 
 # Preemptive checks to see if there is openstack support
 echo -e "\n\n>>> Checking if the required Openstack tools are installed"
@@ -31,13 +31,13 @@ IP=$(openstack server list -c Networks -f value --name $NAME | cut -d " " -f 2)
 echo Instance started on IP: $IP
 
 timeout=0
-until ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP exit || [ "$timeout" -gt 30 ]
+until ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP exit || [ "$timeout" -gt 60 ]
 do
 	sleep 1
 	timeout=$((timeout+1))
 done
 
-if [ "$timeout" -gt 30 ]; then
+if [ "$timeout" -gt 60 ]; then
 	echo No connection made to instance, Exiting
 	exit 1
 fi
