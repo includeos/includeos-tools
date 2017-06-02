@@ -4,18 +4,14 @@ echo -e ">>> Running Intrusive Test"
 
 INCLUDEOS_SRC=${INCLUDEOS_SRC-~/IncludeOS}
 INCLUDEOS_TOOLS=${INCLUDEOS_TOOLS-~/includeos-tools}
-NAME=pull_request_intrusive
-IMAGE_NAME=intrusive-snapshot
-KEY_PAIR_NAME="pr_openstack"
+NAME=intrusive_test_nightly
+IMAGE_NAME=ubuntu16.04
+KEY_PAIR_NAME="master"
 
 # Preemptive checks to see if there is openstack support
 echo -e "\n\n>>> Checking if the required Openstack tools are installed"
 errors=0
-dpkg -l | grep nova > /dev/null 2>&1 || { echo "Nova is required"; errors=$((errors + 1)); }; 
-if [ ! -f $INCLUDEOS_TOOLS/openstack_control/openstack_control.py ]; then
-	echo "openstack_control.py is required"
-   	errors=$((errors + 1))  
-fi
+which openstack > /dev/null 2>&1 || { echo "Openstack cli is required"; errors=$((errors + 1)); }; 
 if [ $errors -gt 0 ]; then
 	echo You do not have the required programs for running the Openstack test, Exiting
 	exit 1
@@ -24,13 +20,14 @@ fi
 # Create trap to ensure clean up
 function clean {
 	echo -e "\n\n>>> Performing clean up"
-	$INCLUDEOS_TOOLS/openstack_control/openstack_control.py --delete $NAME
+	openstack server delete $NAME 
 	echo $errors
 }
 trap clean EXIT
 
 echo Starting instance
-IP="$($INCLUDEOS_TOOLS/openstack_control/openstack_control.py --create $NAME --flavor g1.small --image $IMAGE_NAME --key_pair "$KEY_PAIR_NAME" --should_work)"
+openstack server create --image $IMAGE_NAME --flavor small --key-name $KEY_PAIR_NAME $NAME --wait
+IP=$(openstack server list -c Networks -f value --name $NAME | cut -d " " -f 2)
 echo Instance started on IP: $IP
 
 timeout=0
@@ -53,7 +50,7 @@ ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
 	git clone https://github.com/includeos/includeos-tools.git
 
 	mkdir workspace; cd workspace
-	wget -q 10.10.10.125:8080/built.tar.gz
+	wget -q 192.168.0.18:8080/built.tar.gz
 	tar -zxf built.tar.gz
 
 	pgrep "apt-get"
