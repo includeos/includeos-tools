@@ -1,0 +1,28 @@
+Iface uplink dhcp
+uplink.index: 0
+
+Iface outside dhcp
+outside.index: 1
+
+Iface inside dhcp
+inside.index: 2
+
+Load_balancer lb {
+    layer: tcp,
+    clients: {
+        iface: outside,
+        port: 80,
+        wait_queue_limit: 1000,
+        session_limit: 1000
+    },
+    servers: {
+        iface: inside,
+        algorithm: round_robin,
+        pool: [
+            {
+                address: 10.0.0.1,
+                port: 80
+            }
+        ]
+    }
+}
