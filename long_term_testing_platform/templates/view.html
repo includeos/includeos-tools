@@ -1,0 +1,54 @@
+<html>
+    <head>
+        <title>Monitor Instances</title>
+        <meta http-equiv="refresh" content="5" >
+    </head>
+
+<h1>Monitor entries</h1>
+
+<p>[<a href="/add">Add</a>]</p>
+
+<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+</style>
+<body>
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Health</th>
+    <th>Monitoring</th>
+    <th>Log Interval</th>
+    <th>Notification</th>
+    <th>Last Log</th>
+    <th>Delete</th>
+  </tr>
+{{range .}}
+  <tr>
+    <td>{{.ID}}</td>
+    <td>{{.Health}}</td>
+    <td>{{.Monitoring}}</td>
+    <td>{{.LogInterval}}</td>
+    <td>{{.Notification}}</td>
+    <td>{{.LastLog}}</td>
+    <td><form action="/delete/{{.ID}}" method="POST"><input type="submit" value="Delete"></form></td>
+  </tr>
+{{end}}
+</table>
+
+</body>
+</html>
