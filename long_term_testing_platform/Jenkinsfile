@@ -1,20 +1,29 @@
 pipeline {
-    agent any
+    properties([pipelineTriggers([cron('01 * * * *')])])
+    agent {
+      node {
+        label 'worker_openstack'
+      }
+    }
 
     stages {
-        stage('Build') {
+        stage('Pull latest dev') {
             steps {
-                echo 'Building..'
+                echo 'Pulling dev'
+            }
+        }
+        stage('Deploy microLB') {
+            steps {
+                echo 'Set alias on starbase (redploy if down)'
+                echo 'Building microlb'
+                echo 'Deploy to vcloud'
             }
         }
         stage('Test') {
             steps {
-                echo 'Testing..'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
+                echo 'Register monitor job'
+                echo 'Start load towards microlb'
+                echo 'If no failures are detected it will report success after 23:30 hours'
             }
         }
     }
