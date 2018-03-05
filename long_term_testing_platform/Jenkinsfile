@@ -15,10 +15,14 @@ pipeline {
             }
         }
         stage('Deploy microLB') {
+            environment {
+              MOTHERSHIP_CREDS = credentials('63505852-a03d-4db8-b312-8e7f7f493aad')
+            }
             steps {
-                echo 'Set alias on starbase (redploy if down)'
-                echo 'Building microlb'
-                echo 'Deploy to vcloud'
+                sh '''
+                  set +x
+                  $HOME/mothership-beta/mothership-linux-amd64 -T --host mothership.includeos.org --username $MOTHERSHIP_CREDS_USR --password $MOTHERSHIP_CREDS_PSW images
+                '''
             }
         }
         stage('Test') {
