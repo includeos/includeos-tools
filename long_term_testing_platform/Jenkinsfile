@@ -21,8 +21,30 @@ pipeline {
             steps {
                 sh '''
                   set +x
-                  $HOME/mothership-beta/mothership-linux-amd64 -T --host mothership.includeos.org --username $MOTHERSHIP_CREDS_USR --password $MOTHERSHIP_CREDS_PSW images
+                  $HOME/mothership-beta/mothership-linux-amd64 -T \
+                  --host mothership.includeos.org \
+                  --username $MOTHERSHIP_CREDS_USR \
+                  --password $MOTHERSHIP_CREDS_PSW \
+                  push-nacl nacl_vcloud_nightly.txt
                 '''
+                sh '''
+                  set +x
+                  $HOME/mothership-beta/mothership-linux-amd64 -T \
+                  --host mothership.includeos.org \
+                  --username $MOTHERSHIP_CREDS_USR \
+                  --password $MOTHERSHIP_CREDS_PSW \
+                  set-includeos-version dev || echo Version set
+                '''
+                /*
+                sh '''
+                  set +x
+                  $HOME/mothership-beta/mothership-linux-amd64 -T \
+                  --host mothership.includeos.org \
+                  --username $MOTHERSHIP_CREDS_USR \
+                  --password $MOTHERSHIP_CREDS_PSW \
+                  build
+                '''
+                */
             }
         }
         stage('Test') {
