@@ -1,6 +1,6 @@
 pipeline {
     triggers {
-      cron('01 * * * *')
+      cron('* 01 * * *')
     }
     agent {
       node {
@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Pull latest dev') {
             steps {
-                echo 'Pulling dev'
+              sh 'ssh -t ubuntu@195.225.13.24 ssh root@10.20.17.19 "docker pull includeos/includeos-common:dev"'
             }
         }
         stage('Deploy microLB') {
