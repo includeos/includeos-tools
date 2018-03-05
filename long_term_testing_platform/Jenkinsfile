@@ -1,5 +1,7 @@
 pipeline {
-    properties([pipelineTriggers([cron('01 * * * *')])])
+    triggers {
+      cron('* * * * 1')
+    }
     agent {
       node {
         label 'worker_openstack'
