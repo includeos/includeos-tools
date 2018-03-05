@@ -1,6 +1,6 @@
 pipeline {
     triggers {
-      cron('* * * * 1')
+      cron('01 * * * *')
     }
     agent {
       node {
