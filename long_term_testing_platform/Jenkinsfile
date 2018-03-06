@@ -1,3 +1,4 @@
+def image
 pipeline {
     triggers {
       cron('* 01 * * *')
@@ -7,12 +8,21 @@ pipeline {
         label 'worker_openstack'
       }
     }
+    environment {
+      LB_ALIAS = 'ios_dev_nightly_testing'
+    }
 
     stages {
         stage('Pull latest dev') {
             steps {
               sh 'ssh -t ubuntu@195.225.13.24 ssh root@10.20.17.19 "docker pull includeos/includeos-common:dev"'
             }
+        }
+        stage('Ready starbase') {
+          steps {
+            echo 'Deploying starbase'
+          }
+
         }
         stage('Deploy microLB') {
             environment {
@@ -48,9 +58,6 @@ pipeline {
                   --username $MOTHERSHIP_CREDS_USR \
                   --password $MOTHERSHIP_CREDS_PSW \
                   build -n $nacl_id -u vcloud_internal Starbase)
-                '''
-                sh '''
-                  echo $image
                 '''
             }
         }
