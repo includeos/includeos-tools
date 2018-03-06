@@ -25,7 +25,7 @@ pipeline {
                   --host mothership.includeos.org \
                   --username $MOTHERSHIP_CREDS_USR \
                   --password $MOTHERSHIP_CREDS_PSW \
-                  push-nacl nacl_vcloud_nightly.txt
+                  push-nacl long_term_testing_platform/nacl_vcloud_nightly.txt
                 '''
                 sh '''
                   set +x
@@ -35,16 +35,23 @@ pipeline {
                   --password $MOTHERSHIP_CREDS_PSW \
                   set-includeos-version dev || echo Version set
                 '''
-                /*
                 sh '''
                   set +x
-                  $HOME/mothership-beta/mothership-linux-amd64 -T \
+                  nacl_id=$($HOME/mothership-beta/mothership-linux-amd64 -T \
                   --host mothership.includeos.org \
                   --username $MOTHERSHIP_CREDS_USR \
                   --password $MOTHERSHIP_CREDS_PSW \
-                  build
+                  nacls | grep nacl_vcloud_nightly | head -n 1 | cut -f 1)
+
+                  image=$($HOME/mothership-beta/mothership-linux-amd64 -T \
+                  --host mothership.includeos.org \
+                  --username $MOTHERSHIP_CREDS_USR \
+                  --password $MOTHERSHIP_CREDS_PSW \
+                  build -n $nacl_id -u vcloud_internal Starbase)
                 '''
-                */
+                sh '''
+                  echo $image
+                '''
             }
         }
         stage('Test') {
