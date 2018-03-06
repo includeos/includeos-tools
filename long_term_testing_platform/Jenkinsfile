@@ -1,4 +1,3 @@
-def image
 pipeline {
     triggers {
       cron('* 01 * * *')
@@ -19,8 +18,23 @@ pipeline {
             }
         }
         stage('Ready starbase') {
+          environment {
+            ovfToolLocation = '/usr/bin/ovftool'
+            VCLOUD_CREDS = credentials('vcloud_jenkins')
+          }
           steps {
-            echo 'Deploying starbase'
+            sh '''
+              set +x
+              export vcloudUsername=$VCLOUD_CREDS_USR
+              export vcloudPassword=$VCLOUD_CREDS_PSW
+              $HOME/mothership-beta/mothership-linux-amd64 \
+               launch --hypervisor vcloud \
+               --vcloud-vapp ios_dev_nightly_testing \
+               --vcloud-net "IOS-Network" \
+               --vcloud-address "vcloud.basefarm.no" \
+               --vcloud-org IOS \
+               long_term_testing_platform/vcloud_starbase_10-20-17-170
+            '''
           }
 
         }
