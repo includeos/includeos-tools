@@ -9,6 +9,7 @@ pipeline {
     }
     environment {
       LB_ALIAS = 'ios_dev_nightly_testing'
+      MOTHERSHIP_CREDS = credentials('63505852-a03d-4db8-b312-8e7f7f493aad')
     }
 
     stages {
@@ -17,31 +18,59 @@ pipeline {
               sh 'ssh -t ubuntu@195.225.13.24 ssh root@10.20.17.19 "docker pull includeos/includeos-common:dev"'
             }
         }
-        stage('Ready starbase') {
+        stage('Prepare Starbase') {
           environment {
             ovfToolLocation = '/usr/bin/ovftool'
             VCLOUD_CREDS = credentials('vcloud_jenkins')
           }
           steps {
+            // Remove old instance from Motheship
+            sh '''
+              set +x
+              $HOME/mothership-beta/mothership-linux-amd64 -T \
+              --host mothership.includeos.org \
+              --username $MOTHERSHIP_CREDS_USR \
+              --password $MOTHERSHIP_CREDS_PSW \
+              delete-instance $LB_ALIAS || echo Nothing to delete
+            '''
+            // Launch new Starbase in vcloud
             sh '''
               set +x
               export vcloudUsername=$VCLOUD_CREDS_USR
               export vcloudPassword=$VCLOUD_CREDS_PSW
               $HOME/mothership-beta/mothership-linux-amd64 \
                launch --hypervisor vcloud \
-               --vcloud-vapp ios_dev_nightly_testing \
+               --vcloud-vapp $LB_ALIAS \
                --vcloud-net "IOS-Network" \
                --vcloud-address "vcloud.basefarm.no" \
                --vcloud-org IOS \
                long_term_testing_platform/vcloud_starbase_10-20-17-170
             '''
+            // Assign alias to newly connected starbase
+            sh '''
+            set +x
+            cutoff=$(date -d "30 seconds ago" --rfc-3339=seconds)
+            sleep 20
+            for i in `seq 1 90`; do
+              ID=$(curl -su "$MOTHERSHIP_CREDS" -X GET "https://mothership.includeos.org:8080/instances" \
+              -H  "accept: application/json" | \
+                jq -r '.[] | select((.Net[].addr=="10.20.17.170") and(.Online)) | select(.Events[0].Timestamp >= "$cutoff") | .Id')
+              sleep 1
+              if [ ! -z $ID ]; then
+                break
+              fi
+            done
+
+            $HOME/mothership-beta/mothership-linux-amd64 -T \
+            --host mothership.includeos.org \
+            --username $MOTHERSHIP_CREDS_USR \
+            --password $MOTHERSHIP_CREDS_PSW \
+             instance-alias $ID $LB_ALIAS
+            '''
           }
 
         }
         stage('Deploy microLB') {
-            environment {
-              MOTHERSHIP_CREDS = credentials('63505852-a03d-4db8-b312-8e7f7f493aad')
-            }
             steps {
                 sh '''
                   set +x
@@ -71,12 +100,26 @@ pipeline {
                   --host mothership.includeos.org \
                   --username $MOTHERSHIP_CREDS_USR \
                   --password $MOTHERSHIP_CREDS_PSW \
-                  build -n $nacl_id -u vcloud_internal Starbase)
+                  build --waitAndPrint -n $nacl_id -u vcloud_internal Starbase)
+
+                  $HOME/mothership-beta/mothership-linux-amd64 -T \
+                  --host mothership.includeos.org \
+                  --username $MOTHERSHIP_CREDS_USR \
+                  --password $MOTHERSHIP_CREDS_PSW \
+                  deploy $LB_ALIAS $image
                 '''
             }
         }
         stage('Test') {
             steps {
+              sh '''
+                  set +x
+                  $HOME/mothership-beta/mothership-linux-amd64 -T \
+                  --host mothership.includeos.org \
+                  --username $MOTHERSHIP_CREDS_USR \
+                  --password $MOTHERSHIP_CREDS_PSW \
+                  inspect-instance $LB_ALIAS
+              '''
                 echo 'Register monitor job'
                 echo 'Start load towards microlb'
                 echo 'If no failures are detected it will report success after 23:30 hours'
