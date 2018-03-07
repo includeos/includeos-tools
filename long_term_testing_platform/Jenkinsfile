@@ -1,6 +1,6 @@
 pipeline {
     triggers {
-      cron('* 01 * * *')
+      cron('0 1 * * *')
     }
     agent {
       node {
@@ -26,25 +26,21 @@ pipeline {
           steps {
             // Remove old instance from Motheship
             sh '''
-              set +x
-              $HOME/mothership-beta/mothership-linux-amd64 -T \
-              --host mothership.includeos.org \
-              --username $MOTHERSHIP_CREDS_USR \
-              --password $MOTHERSHIP_CREDS_PSW \
-              delete-instance $LB_ALIAS || echo Nothing to delete
+              long_term_testing_platform/mothership.sh delete-instance $LB_ALIAS || echo Nothing to delete
             '''
             // Launch new Starbase in vcloud
             sh '''
               set +x
               export vcloudUsername=$VCLOUD_CREDS_USR
               export vcloudPassword=$VCLOUD_CREDS_PSW
+              cd long_term_testing_platform
               $HOME/mothership-beta/mothership-linux-amd64 \
                launch --hypervisor vcloud \
                --vcloud-vapp $LB_ALIAS \
                --vcloud-net "IOS-Network" \
                --vcloud-address "vcloud.basefarm.no" \
                --vcloud-org IOS \
-               long_term_testing_platform/vcloud_starbase_10-20-17-170
+               vcloud_starbase_10-20-17-170
             '''
             // Assign alias to newly connected starbase
             sh '''

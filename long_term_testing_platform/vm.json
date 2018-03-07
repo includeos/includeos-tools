@@ -1,0 +1,7 @@
+{
+  "net" : [
+    {"device" : "vmxnet3"},
+    {"device" : "vmxnet3"},
+    {"device" : "vmxnet3"}
+  ]
+}
