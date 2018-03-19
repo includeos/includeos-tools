@@ -86,7 +86,14 @@ pipeline {
               sh '''
                   long_term_testing_platform/mothership.sh inspect-instance $LB_ALIAS
               '''
-                echo 'Register monitor job'
+              sh '''
+                  docker pull mnordsletten/lotto
+                  docker run mnordsletten/lotto \
+                    --mHost mothership.includeos.org \
+                    --mUser $MOTHERSHIP_CREDS_USR \
+                    --mPwd $MOTHERSHIP_CREDS_PSW \
+                    $LB_ALIAS 30s
+              '''
                 echo 'Start load towards microlb'
                 echo 'If no failures are detected it will report success after 23:30 hours'
             }
