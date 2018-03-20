@@ -4,7 +4,7 @@ pipeline {
     }
     agent {
       node {
-        label 'worker_openstack'
+        label 'Master Vcloud'
       }
     }
     environment {
@@ -14,9 +14,10 @@ pipeline {
 
     stages {
         stage('Pull latest dev') {
-            steps {
-              sh 'ssh -t ubuntu@195.225.13.24 ssh root@10.20.17.19 "docker pull includeos/includeos-common:dev"'
-            }
+          agent { label 'Mothership latest vcloud' }
+          steps {
+            sh 'docker pull includeos/includeos-common:dev'
+          }
         }
         stage('Prepare Starbase') {
           environment {
@@ -86,6 +87,7 @@ pipeline {
               sh '''
                   long_term_testing_platform/mothership.sh inspect-instance $LB_ALIAS
               '''
+              /*
               sh '''
                   docker pull mnordsletten/lotto
                   docker run mnordsletten/lotto \
@@ -94,6 +96,7 @@ pipeline {
                     --mPwd $MOTHERSHIP_CREDS_PSW \
                     $LB_ALIAS 30s
               '''
+              */
                 echo 'Start load towards microlb'
                 echo 'If no failures are detected it will report success after 23:30 hours'
             }
