@@ -65,7 +65,6 @@ pipeline {
             long_term_testing_platform/mothership.sh instance-alias $ID $LB_ALIAS
             '''
           }
-
         }
         stage('Deploy microLB') {
             steps {
@@ -83,23 +82,30 @@ pipeline {
             }
         }
         stage('Test') {
-            steps {
-              sh '''
-                  long_term_testing_platform/mothership.sh inspect-instance $LB_ALIAS
-              '''
-              /*
-              sh '''
+          parallel {
+            stage('Monitor') {
+              agent {
+                label "worker_openstack"
+              }
+              steps {
+                sh '''
                   docker pull mnordsletten/lotto
-                  docker run mnordsletten/lotto \
+                  timeout 60 docker run mnordsletten/lotto \
                     --mHost mothership.includeos.org \
                     --mUser $MOTHERSHIP_CREDS_USR \
                     --mPwd $MOTHERSHIP_CREDS_PSW \
                     $LB_ALIAS 30s
-              '''
-              */
-                echo 'Start load towards microlb'
-                echo 'If no failures are detected it will report success after 23:30 hours'
+                '''
+              }
             }
+            stage('Attack') {
+              steps {
+                sh '''
+                   ssh 10.20.10.54 "echo 'GET http://10.20.17.171' | ./vegeta attack -rate 1000 -duration 60s | ./vegeta report -reporter text"
+                 '''
+              }
+            }
+          }
         }
     }
 }
