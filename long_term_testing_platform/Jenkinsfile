@@ -31,7 +31,7 @@ pipeline {
               export vcloudUsername=$VCLOUD_CREDS_USR
               export vcloudPassword=$VCLOUD_CREDS_PSW
               cd long_term_testing_platform
-              $HOME/mothership-beta/mothership-linux-amd64 -T \
+              $HOME/mothership/mothership-linux-amd64 -T \
                launch --hypervisor vcloud \
                --vcloud-vapp $LB_ALIAS \
                --vcloud-net "IOS-Network" \
