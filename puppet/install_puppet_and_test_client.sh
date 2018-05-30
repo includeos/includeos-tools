@@ -6,4 +6,6 @@ sudo apt-get update
 
 sudo apt-get install puppet-agent
 
+./install_gcc_httperf.sh
+
 sudo /opt/puppetlabs/bin/puppet apply ~/includeos-tools/puppet/test_client.pp
