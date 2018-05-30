@@ -3,16 +3,17 @@ package { "autoconf" :
         ensure => present,
 }
 
+/*
 exec{ "httperf-from-source" :
        path => "/home/ubuntu",
        command => "wget https://github.com/rtCamp/httperf/archive/master.zip; unzip master.zip; cd httperf-master; autoreconf -i; mkdir build && cd build; ../configure; make && make install",
        unless => 'httperf -v | grep open',
 }
+*/
 
-/*
 service { 'httperf' :
         ensure => running,
-}*/
+}
 
 package { "arping" :
         ensure => present,
@@ -34,16 +35,19 @@ package { "dnsmasq" :
 service { 'g++-7' :
         ensure => running,
 }
-*/
 
 exec { "g++" :
         command => 'sudo add-apt-repository ppa:jonathonf/gcc-7.1 && sudo apt-get update && sudo apt-get install -y gcc-7 g++-7',
+        unless => 'gcc -v',
 }
 
-/*
+*/
+
 package { "g++" :
         ensure => present,
 }
+
+/*
 package { "g++-multilib" :
         ensure => present,
 }
