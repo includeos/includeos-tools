@@ -1,6 +1,15 @@
-package { "httperf" :
+
+/* package { "httperf" :
         ensure => present,
+} */
+
+exec{ "httperf_from_source" :
+       path => "/home/ubuntu",
+       command => "wget https://github.com/rtCamp/httperf/archive/master.zip && unzip master.zip; cd httperf-master; autoreconf -i; mkdir build && cd build; ../configure; make && make install",
+       unless => 'httperf -v | grep open',
 }
+
+
 package { "arping" :
         ensure => present,
 }
