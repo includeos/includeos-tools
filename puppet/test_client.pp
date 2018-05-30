@@ -3,9 +3,9 @@
         ensure => present,
 } */
 
-exec{ "httperf_from_source" :
+exec{ "httperf-from-source" :
        path => "/home/ubuntu",
-       command => "wget https://github.com/rtCamp/httperf/archive/master.zip && unzip master.zip; cd httperf-master; autoreconf -i; mkdir build && cd build; ../configure; make && make install",
+       command => "usr/bin/wget https://github.com/rtCamp/httperf/archive/master.zip && unzip master.zip; cd httperf-master; autoreconf -i; mkdir build && cd build; ../configure; make && make install",
        unless => 'httperf -v | grep open',
 }
 
@@ -21,13 +21,19 @@ package { "python-junit.xml" :
 }
 package { "dnsmasq" :
         ensure => present,
+
+exec { "g++" :
+        command => 'sudo add-apt-repository ppa:jonathonf/gcc-7.1 && sudo apt-get update && sudo apt-get install gcc-7 g++-7',
 }
+/*
 package { "g++" :
         ensure => present,
 }
 package { "g++-multilib" :
         ensure => present,
 }
+*/
+
 package { "python-psutil" :
         ensure => present,
 }
