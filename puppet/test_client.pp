@@ -1,11 +1,11 @@
 
-/* package { "httperf" :
+package { "autoconf" :
         ensure => present,
-} */
+}
 
 exec{ "httperf-from-source" :
        path => "/home/ubuntu",
-       command => "usr/bin/wget https://github.com/rtCamp/httperf/archive/master.zip && unzip master.zip; cd httperf-master; autoreconf -i; mkdir build && cd build; ../configure; make && make install",
+       command => "wget https://github.com/rtCamp/httperf/archive/master.zip; unzip master.zip; cd httperf-master; autoreconf -i; mkdir build && cd build; ../configure; make && make install",
        unless => 'httperf -v | grep open',
 }
 
@@ -25,6 +25,7 @@ package { "dnsmasq" :
 exec { "g++" :
         command => 'sudo add-apt-repository ppa:jonathonf/gcc-7.1 && sudo apt-get update && sudo apt-get install gcc-7 g++-7',
 }
+
 /*
 package { "g++" :
         ensure => present,
