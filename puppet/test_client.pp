@@ -16,22 +16,31 @@ exec { "gcc" :
         path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
         command => 'sudo add-apt-repository ppa:jonathonf/gcc-7.1 && sudo apt-get update && sudo apt-get install -y gcc-7 g++-7',
         provider => 'shell',
-        onlyif => "if [[ '$(ls -l /usr/bin/gcc | grep gcc | cut -d ' ' -f 12)' != 'gcc-7.1' ]]; then exit 0 ; else exit 1; fi;",
+#        onlyif => "if [[ '$(ls -l /usr/bin/gcc | grep gcc | cut -d ' ' -f 12)' != 'gcc-7.1' ]]; then exit 0 ; else exit 1; fi;",
 }
 
 notify { "gcc executed" :
         require => Exec["gcc"],
 }
 
-exec{ "httperf-from-source" :
+exec{ "httperf-download" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-       command => 'wget https://github.com/rtCamp/httperf/archive/master.zip; unzip master.zip; cd httperf-master; autoreconf -i; mkdir build && cd build; ../configure; make && make install",
+       command => 'wget https://github.com/rtCamp/httperf/archive/master.zip; unzip master.zip',
        provider => 'shell',
-       onlyif => "if [[ '$(httperf -v | grep open | cut -d '=' -f 2 | tr -d '[:space:]')' == 1024 ]]; then exit 0; else exit 1; fi;"
+# works only if httperf was previously installed.
+#       onlyif => "if [[ '$(httperf -v | grep open | cut -d '=' -f 2 | tr -d '[:space:]')' == 1024 ]]; then exit 0; else exit 1; fi;"
+}
+
+exec{ "httperf-build" :
+       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+       command => 'cd httperf-master; autoreconf -i; mkdir build && cd build; ../configure; make && make install',
+       provider => 'shell',
+# works only if httperf was previously installed.
+#       onlyif => "if [[ '$(httperf -v | grep open | cut -d '=' -f 2 | tr -d '[:space:]')' == 1024 ]]; then exit 0; else exit 1; fi;"
 }
 
 notify { "httperf executed" :
-        require => Exec["httperf-from-source"],
+        require => Exec["httperf-build"],
 }
 
 package { "arping" :
