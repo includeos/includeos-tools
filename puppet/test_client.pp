@@ -4,10 +4,10 @@ package { "autoconf" :
 }
 
 exec{ "httperf-from-source" :
-       path => ["/usr/bin/","/usr/sbin/","/bin"],
+       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
        command => "wget https://github.com/rtCamp/httperf/archive/master.zip; unzip master.zip; cd httperf-master; autoreconf -i; mkdir build && cd build; ../configure; make && make install",
-#       unless => 'httperf -v | grep open | cut -d "=" -f 2',
-       onlyif => "if [[ `httperf -v | grep open | cut -d "=" -f 2` <= `1024` ]]; then exit 0 ; else exit 1; fi;",
+       provider => 'shell',
+       onlyif => "if [[ '$(httperf -v | grep open | cut -d '=' -f 2 | tr -d '[:space:]')' == 1024 ]]; then exit 0; else exit 1; fi;"
 }
 
 package { "arping" :
@@ -27,10 +27,10 @@ package { "dnsmasq" :
 }
 
 exec { "gcc" :
-        path => ["/usr/bin/","/usr/sbin/","/bin"],
+        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
         command => 'sudo add-apt-repository ppa:jonathonf/gcc-7.1 && sudo apt-get update && sudo apt-get install -y gcc-7 g++-7',
-#        unless => 'ls -l /usr/bin/gcc | grep gcc | cut -d " " -f 12',
-        onlyif => "if [[ `ls -l /usr/bin/gcc | grep gcc | cut -d " " -f 12` != `gcc-7.1` ]]; then exit 0 ; else exit 1; fi;",
+        provider => 'shell',
+        onlyif => "if [[ '$(ls -l /usr/bin/gcc | grep gcc | cut -d ' ' -f 12)' != 'gcc-7.1' ]]; then exit 0 ; else exit 1; fi;",
 }
 
 package { "python-psutil" :
