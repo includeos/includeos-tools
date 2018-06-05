@@ -39,14 +39,44 @@ exec{ "httperf-download" :
        # onlyif => "if [[ '$(httperf -v | grep open | cut -d '=' -f 2 | tr -d '[:space:]')' == 1024 ]]; then exit 0; else exit 1; fi;"
 }
 
+exec{ "autoreconf" :
+       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master',
+       command => 'autoreconf -i',
+       provider => 'shell
+       require => Exec["httperf-download"],
+}
+
+exec{ "mkdir" :
+       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master',
+       command => 'mkdir -p build',
+       provider => 'shell',
+
+}
+
+file {'apply-config':
+  ensure => 'file',
+  path   => '/home/ubuntu/includeos-tools/puppet/httperf-master/configure',
+  owner  => 'root',
+  mode   => '755',
+  notify => Exec['exec-build-conf'],
+}
+
+exec{ "exec-build-conf" :
+       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
+       command => 'configure',
+       provider => 'shell',
+}
+
 exec{ "httperf-build" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
        cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master',
-       command => 'autoreconf -i; mkdir -p build; cd build; ../configure; make; make install',
+       command => 'make; make install',
        provider => 'shell',
-       # works only if httperf was previously installed.
-       # onlyif => "if [[ '$(httperf -v | grep open | cut -d '=' -f 2 | tr -d '[:space:]')' == 1024 ]]; then exit 0; else exit 1; fi;"
 }
+
 
 notify { "httperf executed" :
         require => Exec["httperf-build"],
