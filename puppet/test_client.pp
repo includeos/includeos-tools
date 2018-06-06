@@ -47,7 +47,7 @@ exec { "autoreconf" :
        require => Exec["httperf-download"],
 }
 
-file { '/home/ubuntu/includeos-tools/puppet/httperf-master/build' :
+file { "/home/ubuntu/includeos-tools/puppet/httperf-master/build" :
        ensure => 'directory',
 }
 
@@ -59,6 +59,7 @@ file {'locate-config-file':
   notify => Exec['exec-build-conf'],
 }
 
+# path to execute file: configure is invalid
 exec { "exec-build-conf" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
        cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
@@ -66,16 +67,18 @@ exec { "exec-build-conf" :
        provider => 'shell',
 }
 
-exec { "httperf-build" :
+exec { "make" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
        cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master',
-       command => 'make; make install',
+       command => 'make',
        provider => 'shell',
 }
 
-
-notify { "httperf executed" :
-        require => Exec["httperf-build"],
+exec { "make-install" :
+       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master',
+       command => 'make install',
+       provider => 'shell',
 }
 
 package { "arping" :
@@ -93,7 +96,6 @@ package { "python-junit.xml" :
 package { "dnsmasq" :
         ensure => present,
 }
-
 
 package { "python-psutil" :
         ensure => present,
