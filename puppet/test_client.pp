@@ -43,7 +43,7 @@ exec { "autoreconf" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
        cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master',
        command => 'autoreconf -i',
-       provider => 'shell
+       provider => 'shell',
        require => Exec["httperf-download"],
 }
 
@@ -51,9 +51,9 @@ file { '/home/ubuntu/includeos-tools/puppet/httperf-master/build' :
        ensure => 'directory',
 }
 
-file {'apply-config':
+file {'locate-config-file':
   ensure => 'file',
-  path   => '/home/ubuntu/includeos-tools/puppet/httperf-master/configure',
+  path   => '/home/ubuntu/includeos-tools/puppet/httperf-master/configure.ac',
   owner  => 'root',
   mode   => '755',
   notify => Exec['exec-build-conf'],
@@ -62,7 +62,7 @@ file {'apply-config':
 exec { "exec-build-conf" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
        cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
-       command => 'configure',
+       command => '../configure',
        provider => 'shell',
 }
 
