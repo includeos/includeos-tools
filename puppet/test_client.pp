@@ -20,8 +20,10 @@ package { "libtool-bin" :
         ensure => present,
 }
 
-package { "gcc" :
-        ensure => present,
+exec { "gcc" :
+        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+        command => 'sudo apt install gcc',
+        provider => 'shell',
 }
 
 exec { "gcc-7" :
@@ -29,10 +31,6 @@ exec { "gcc-7" :
         command => 'sudo add-apt-repository ppa:jonathonf/gcc-7.1 && sudo apt-get update && sudo apt-get install -y gcc-7 g++-7',
         provider => 'shell',
 #        onlyif => "if [[ '$(ls -l /usr/bin/gcc | grep gcc | cut -d ' ' -f 12)' != 'gcc-7.1' ]]; then exit 0 ; else exit 1; fi;",
-}
-
-notify { "gcc executed" :
-        require => Exec["gcc"],
 }
 
 exec { "httperf-download" :
