@@ -20,7 +20,11 @@ package { "libtool-bin" :
         ensure => present,
 }
 
-exec { "gcc" :
+package { "gcc" :
+        ensure => present,
+}
+
+exec { "gcc-7" :
         path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
         command => 'sudo add-apt-repository ppa:jonathonf/gcc-7.1 && sudo apt-get update && sudo apt-get install -y gcc-7 g++-7',
         provider => 'shell',
@@ -59,14 +63,14 @@ exec { "exec-build-conf" :
 
 exec { "make" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master',
+       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
        command => 'make',
        provider => 'shell',
 }
 
 exec { "make-install" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master',
+       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
        command => 'make install',
        provider => 'shell',
 }
