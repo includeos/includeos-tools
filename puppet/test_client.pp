@@ -7,7 +7,6 @@ package { "unzip" :
         ensure => present,
 }
 
-
 package { "make" :
         ensure => present,
 }
@@ -17,6 +16,10 @@ package { "libtool" :
 }
 
 package { "libtool-bin" :
+        ensure => present,
+}
+
+package { "parallel" :
         ensure => present,
 }
 
@@ -55,7 +58,8 @@ file { "/home/ubuntu/includeos-tools/puppet/httperf-master/build" :
 
 exec { "exec-build-conf" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-       command => 'bash /home/ubuntu/includeos-tools/puppet/httperf-master/build/../configure',
+       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
+       command => 'sudo /home/ubuntu/includeos-tools/puppet/httperf-master/build/../configure',
        provider => 'shell',
 }
 
