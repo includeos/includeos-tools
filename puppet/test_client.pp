@@ -51,18 +51,9 @@ file { "/home/ubuntu/includeos-tools/puppet/httperf-master/build" :
        ensure => 'directory',
 }
 
-#file {'locate-config-file':
-#  ensure => present,
-#  path   => '/home/ubuntu/includeos-tools/puppet/httperf-master/configure',
-#  notify => Exec['exec-build-conf'],
-#}
-
-# path to execute file: configure is invalid
 exec { "exec-build-conf" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-#       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
-#       require => File[locate-config-file],
-       command => '/home/ubuntu/includeos-tools/puppet/httperf-master/configure -f /home/ubuntu/includeos-tools/puppet/httperf-master/build',
+       command => 'bash /home/ubuntu/includeos-tools/puppet/httperf-master/build/../configure',
        provider => 'shell',
 }
 
