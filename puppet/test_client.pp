@@ -63,7 +63,8 @@ file {'locate-config-file':
 exec { "exec-build-conf" :
        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
        cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
-       command => '../configure',
+       require => File[locate-config-file],
+       command => '/bin/sh configure',
        provider => 'shell',
 }
 
