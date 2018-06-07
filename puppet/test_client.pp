@@ -23,6 +23,12 @@ package { "parallel" :
         ensure => present,
 }
 
+exec {"reconfigure-locales" :
+        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+        command => 'sudo dpkg-reconfigure -u locales',
+        provider => 'shell',
+}
+
 exec { "gcc" :
         path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
         command => 'sudo apt install gcc',
@@ -96,13 +102,16 @@ package { "dnsmasq" :
 package { "python-psutil" :
         ensure => present,
 }
+
 package { "grub2" :
         ensure => present,
 }
+
 service { 'dnsmasq' :
         ensure => running,
         require => Package['dnsmasq'],
 }
+
 exec { "modify-dnsmasq" :
         path => "/opt/puppetlabs/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
         command => 'echo "interface=bridge43 \ndhcp-range=10.0.0.2,10.0.0.200,12h" >> /etc/dnsmasq.conf',
