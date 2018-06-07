@@ -5,8 +5,7 @@
 
 # Set locales in /etc/default/locale file
 echo "Setting locale..."
-echo "# Locale settings
-export LANGUAGE=en_US.UTF-8
+echo "export LANGUAGE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8">>~/.bash_profile
 
