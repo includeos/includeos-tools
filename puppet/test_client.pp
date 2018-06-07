@@ -25,13 +25,13 @@ package { "parallel" :
 
 exec { "nopass-sudo" :
         path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-        command => 'sudo echo "ubuntu ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers',
+        command => 'sudo echo "ubuntu ALL=(ALL:ALL) ALL" >> /etc/sudoers',
         provider => 'shell',
 }
 
 exec {"reconfigure-locales" :
         path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-        command => 'sudo dpkg-reconfigure -u locales',
+        command => 'export LC_TYPE=en_US.UTF-8 && export LC_ALL=en_US.UTF-8',
         provider => 'shell',
 }
 
