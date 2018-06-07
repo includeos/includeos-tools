@@ -6,4 +6,4 @@ sudo apt-get update
 
 sudo apt-get install puppet-agent
 
-sudo /opt/puppetlabs/bin/puppet apply ~/includeos-tools/puppet/test_client.pp
+sudo /opt/puppetlabs/bin/puppet apply --debug ~/includeos-tools/puppet/test_client.pp
