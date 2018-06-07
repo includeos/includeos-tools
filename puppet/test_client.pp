@@ -23,7 +23,7 @@ package { "parallel" :
         ensure => present,
 }
 
-# not needed for openstack instances BUT required for vlcloud
+# not needed for openstack instances BUT required for vcloud
 #exec { "nopass-sudo" :
 #        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
 #        command => 'sudo echo "ubuntu ALL=(ALL:ALL) ALL" >> /etc/sudoers',
