@@ -23,11 +23,12 @@ package { "parallel" :
         ensure => present,
 }
 
-exec { "nopass-sudo" :
-        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-        command => 'sudo echo "ubuntu ALL=(ALL:ALL) ALL" >> /etc/sudoers',
-        provider => 'shell',
-}
+# not needed for openstack instances BUT required for vlcloud
+#exec { "nopass-sudo" :
+#        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+#        command => 'sudo echo "ubuntu ALL=(ALL:ALL) ALL" >> /etc/sudoers',
+#        provider => 'shell',
+#}
 
 exec {"reconfigure-locales" :
         path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
