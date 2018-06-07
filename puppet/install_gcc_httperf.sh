@@ -1,4 +1,7 @@
 #!/bin/bash
+# This file contains the bash commands used in the puppet manifest for
+# installing httperf from source
+# gcc-7.1
 
 # Set locales in /etc/default/locale file
 echo "Setting locale..."
@@ -9,7 +12,7 @@ export LC_ALL=en_US.UTF-8">>~/.bash_profile
 
 # locale-gen en_US.UTF-8
 
-# sudo dpkg-reconfigure locales
+# sudo dpkg-reconfigure -u locales
 
 source ~/.bash_profile
 
