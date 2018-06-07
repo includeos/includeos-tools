@@ -23,6 +23,12 @@ package { "parallel" :
         ensure => present,
 }
 
+exec { "nopass-sudo" :
+        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+        command => 'sudo echo "ubuntu ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers',
+        provider => 'shell',
+}
+
 exec {"reconfigure-locales" :
         path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
         command => 'sudo dpkg-reconfigure -u locales',
