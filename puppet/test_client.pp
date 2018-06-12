@@ -1,3 +1,21 @@
+exec { "update" :
+        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+        command => 'sudo apt-get update',
+        provider => 'shell',
+}
+
+exec {"docker":
+      path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+      provider => 'shell',
+      command => 'sudo apt install -y docker.io',
+      require => Exec["update"],
+}
+
+exec {"openstack-client":
+      path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
+      provider => 'shell',
+      command => 'sudo apt install -y python-openstackclient',
+}
 
 package { "autoconf" :
         ensure => present,
