@@ -13,7 +13,7 @@ git clone https://github.com/staiyeba/includeos-tools.git
 cd includeos-tools/puppet
 echo "Installing puppet and other necessary tools"
 ./install_puppet_and_test_client.sh
-
+cd
 echo "Getting includeos repo"
 git clone https://github.com/hioa-cs/IncludeOS.git
 cd IncludeOS
