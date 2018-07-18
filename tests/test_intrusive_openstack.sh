@@ -8,6 +8,9 @@ NAME=intrusive_test_nightly
 IMAGE_NAME=ubuntu16.04
 KEY_PAIR_NAME="pipe_openstack"
 
+# Prepend random string to the end of name
+NAME=$NAME-$(date | shasum | cut -d " " -f 1)
+
 # Preemptive checks to see if there is openstack support
 echo -e "\n\n>>> Checking if the required Openstack tools are installed"
 errors=0
@@ -43,16 +46,18 @@ if [ "$timeout" -gt 60 ]; then
 fi
 
 ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
-	export CC="clang-3.8"
-	export CXX="clang++-3.8"
-	export INCLUDEOS_SRC=~/IncludeOS
-	export INCLUDEOS_PREFIX=~/IncludeOS_install
-	export INCLUDEOS_ENABLE_TEST=ON
+    export WORKSPACE=$PWD
+    export INCLUDEOS_SRC=$WORKSPACE
+    export INCLUDEOS_PREFIX=$WORKSPACE/IncludeOS_install
+    export CC=clang-5.0
+    export CXX=clang++-5.0
+    export num_jobs="-j 4"
+    export INCLUDEOS_ENABLE_TEST=OFF
 
 	git clone https://github.com/hioa-cs/IncludeOS.git
 	cd IncludeOS
 	git checkout dev
-	./install.sh
+	./install.sh -y 
 
 	cd test
 	./testrunner.py -t intrusive'

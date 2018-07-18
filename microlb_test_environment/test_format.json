@@ -1,0 +1,14 @@
+{
+  "infrastructure": {
+    "clients": 1,
+    "servers": 1
+  },
+  "load": {
+    "num_users": 10,
+    "rps": 10
+  },
+  "maintenance": {
+    "liveupdate": "60",
+    "logs": "10"
+  }
+}
