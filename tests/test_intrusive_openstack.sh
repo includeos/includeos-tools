@@ -46,6 +46,10 @@ if [ "$timeout" -gt 60 ]; then
 fi
 
 ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
+	git clone https://github.com/hioa-cs/IncludeOS.git
+	cd IncludeOS
+	git checkout dev
+
     export WORKSPACE=$PWD
     export INCLUDEOS_SRC=$WORKSPACE
     export INCLUDEOS_PREFIX=$WORKSPACE/IncludeOS_install
@@ -54,9 +58,6 @@ ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
     export num_jobs="-j 4"
     export INCLUDEOS_ENABLE_TEST=OFF
 
-	git clone https://github.com/hioa-cs/IncludeOS.git
-	cd IncludeOS
-	git checkout dev
 	./install.sh -y 
 
 	cd test
