@@ -1,9 +1,9 @@
-#check_mk
+# Check_Mk
 
 
-1. getting started with Check_MK installation:
+## 1. getting started with Check_MK installation:
 
-UBuntu 16.04 Package:
+### Ubuntu 16.04 Package:
 
 `# wget https://mathias-kettner.de/support/1.4.0p16/check-mk-raw-1.4.0p16_0.xenial_amd64.deb
 # apt-get install gdebi-core
@@ -13,7 +13,7 @@ UBuntu 16.04 Package:
 
 Issues on xenial reference : https://stackoverflow.com/questions/45953923/omd-vs-ubuntu-install-issues
 
-Rhel Server package:
+### Rhel Server package:
 
 `# wget http://files.omdistro.org/releases/1.30/omd-1.30.rhel7.x86_64.rpm
 
@@ -23,15 +23,15 @@ Rhel Server package:
 Reference: https://linuxtechlab.com/complete-monitoring-solution-install-omd-open-monitoring-distribution/
 
 
-2. Creating monitoring site droplet:
+## 2. Creating monitoring site droplet:
 
-Create site:
+#### Create site:
 
 `# omd create monitoring
 # su - monitoring
 # root@monitoring:/home/ubuntu# omd create monitoring`
 
-Output:
+#### Output:
 
 `Adding /opt/omd/sites/monitoring/tmp to /etc/fstab.
 Creating temporary filesystem /omd/sites/monitoring/tmp...OK
@@ -46,12 +46,14 @@ Created new site monitoring with version 1.4.0p16.cre.
 )
   Please do a su - monitoring for administration of this site.`
 
-3. Adding the omd droplet as an agent
+### 3. Adding the omd droplet as an agent
 
 `# wget http://mathias-kettner.de/download/check-mk-agent_1.2.4p5-2_all.deb
 # dpkg -i check-mk-agent_1.2.4p5-2_all.deb
 # check_mk_agent
 # telnet localhost 6556`
+
+Add droplet as an agent so the server itself can be monitored too...
 
 `# vi /etc/xinetd.d/check_mk
 
@@ -59,12 +61,14 @@ Created new site monitoring with version 1.4.0p16.cre.
   only_from      = 127.0.0.1
   # incase of server droplet add localhost, for other agents add your-omd-droplet-ip
 `
+Restart xinetd service
+
 `$ service xinetd restart`
 
-4. Configuring Agents on other Hosts
+### 4. Configuring Agents on other Hosts
 
 
-- For Debian Hosts
+### For Debian Hosts
 
 `# apt-get install xinetd
 # wget http://mathias-kettner.de/download/check-mk-agent_1.2.4p5-2_all.deb
@@ -72,15 +76,18 @@ Created new site monitoring with version 1.4.0p16.cre.
 # check_mk_agent
 # telnet localhost 6556`
 
+Add monitoring droplet ip address to all agent hosts.
+
 `# vi /etc/xinetd.d/check_mk
 
   # configure the IP address(es) of your Nagios server here:
   only_from      = your-omd-droplet-ip`
 
+Restart xinetd service
+
 `# service xinetd restart`
 
-
-- For Rhel Hosts
+### For Rhel Hosts
 
 `# yum install xinetd
 # wget http://mathias-kettner.de/download/check_mk-agent-1.2.4p5-1.noarch.rpm
@@ -89,9 +96,12 @@ Created new site monitoring with version 1.4.0p16.cre.
 # configure the IP address(es) of your Nagios server here:
 only_from      = your-omd-droplet-ip`
 
-# service xinetd restart
+Restart xinetd service
+
+`# service xinetd restart`
 
 
 Note:
 On rhel, the firewall needs to allow connection on port 6556
+
 `# sudo iptables -I INPUT 1 -i eth0 -p tcp --dport 6556 -m state --state NEW -j ACCEPT`
