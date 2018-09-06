@@ -6,7 +6,7 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8">>~/.bash_profile
 source ~/.bash_profile
 
-sudo apt-get install xinetd
+sudo apt-get install xinetd -y
 wget http://mathias-kettner.de/download/check-mk-agent_1.2.4p5-2_all.deb
 sudo dpkg -i check-mk-agent_1.2.4p5-2_all.deb
 sudo check_mk_agent
