@@ -14,7 +14,7 @@ NAME=$NAME-$(date | shasum | cut -d " " -f 1)
 # Preemptive checks to see if there is openstack support
 echo -e "\n\n>>> Checking if the required Openstack tools are installed"
 errors=0
-which openstack > /dev/null 2>&1 || { echo "Openstack cli is required"; errors=$((errors + 1)); }; 
+which openstack > /dev/null 2>&1 || { echo "Openstack cli is required"; errors=$((errors + 1)); };
 if [ $errors -gt 0 ]; then
 	echo You do not have the required programs for running the Openstack test, Exiting
 	exit 1
@@ -23,7 +23,7 @@ fi
 # Create trap to ensure clean up
 function clean {
 	echo -e "\n\n>>> Performing clean up"
-	openstack server delete $NAME 
+	openstack server delete $NAME
 	echo $errors
 }
 trap clean EXIT
@@ -57,10 +57,13 @@ ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
 	git clone https://github.com/hioa-cs/IncludeOS.git
 	cd IncludeOS
 	git checkout dev
-	./install.sh -y 
+	./install.sh -y
 
 	cd test
-	./testrunner.py -t intrusive'
+	./testrunner.py -t intrusive
+	cd
+        cd includeos-tools/monitor_hosts_checkmk/
+        ./install_checkmk_agent_debian.sh
 
 errors=$?
 # Exit
