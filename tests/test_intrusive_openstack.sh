@@ -46,6 +46,7 @@ if [ "$timeout" -gt 60 ]; then
 fi
 
 ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $IP '
+	sudo pip install subprocess32 -y
 	git clone https://github.com/hioa-cs/IncludeOS.git
 	cd IncludeOS
 	git checkout dev
