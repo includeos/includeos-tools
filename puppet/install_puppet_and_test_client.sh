@@ -1,9 +1,9 @@
 #!/bin/bash
 
-wget https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb
-sudo dpkg -i puppetlabs-release-pc1-xenial.deb
+wget https://apt.puppet.com/puppet6-release-bionic.deb
+sudo dpkg -i puppet6-release-bionic.deb
 sudo apt-get update
 
-sudo apt-get install puppet-agent
+sudo apt-get -y install puppet
 
-sudo /opt/puppetlabs/bin/puppet apply --debug ~/includeos-tools/puppet/test_client.pp
+sudo puppet apply ~/includeos-tools/puppet/test_client.pp
