@@ -1,110 +1,31 @@
+# Build system
+package { [ "cmake" , "make", "nasm", "libssl-dev" ] :
+  ensure => present,
+}
 
-package { "autoconf" :
+# Compilers
+package { [ "clang-6.0", "gcc-7", "g++-multilib" ] :
+  ensure => present,
+}
+
+# Test system dependencies
+package { [ "qemu-system", "lcov" ] :
+  ensure => present,
+}
+
+# Test tools
+package { [ "arping", "httperf", "hping3", "iperf3", "dnsmasq", "dosfstools", "xorriso" ] :
         ensure => present,
 }
 
-package { "unzip" :
-        ensure => present,
+package { [ "python3-pip", "python3-setuptools", "python3-dev" ] :
+  ensure => present,
 }
 
-package { "make" :
-        ensure => present,
-}
-
-package { "libtool" :
-        ensure => present,
-}
-
-package { "libtool-bin" :
-        ensure => present,
-}
-
-package { "parallel" :
-        ensure => present,
-}
-
-exec {"reconfigure-locales" :
-        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-        command => 'sudo dpkg-reconfigure -u locales',
-        provider => 'shell',
-}
-
-exec { "gcc" :
-        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-        command => 'sudo apt install gcc',
-        provider => 'shell',
-}
-
-exec { "gcc-7" :
-        path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-        command => 'sudo add-apt-repository ppa:jonathonf/gcc-7.1 && sudo apt-get update && sudo apt-get install -y gcc-7 g++-7',
-        provider => 'shell',
-#        onlyif => "if [[ '$(ls -l /usr/bin/gcc | grep gcc | cut -d ' ' -f 12)' != 'gcc-7.1' ]]; then exit 0 ; else exit 1; fi;",
-}
-
-exec { "httperf-download" :
-       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-       command => 'wget https://github.com/rtCamp/httperf/archive/master.zip; unzip master.zip',
-       provider => 'shell',
-       # works only if httperf was previously installed.
-       # onlyif => "if [[ '$(httperf -v | grep open | cut -d '=' -f 2 | tr -d '[:space:]')' == 1024 ]]; then exit 0; else exit 1; fi;"
-}
-
-exec { "autoreconf" :
-       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master',
-       command => 'autoreconf -i',
-       provider => 'shell',
-       require => Exec["httperf-download"],
-}
-
-file { "/home/ubuntu/includeos-tools/puppet/httperf-master/build" :
-       ensure => 'directory',
-}
-
-exec { "exec-build-conf" :
-       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
-       command => 'sudo /home/ubuntu/includeos-tools/puppet/httperf-master/build/../configure',
-       provider => 'shell',
-}
-
-exec { "make" :
-       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
-       command => 'make',
-       provider => 'shell',
-}
-
-exec { "make-install" :
-       path => ["/usr/bin/","/usr/sbin/","/bin","/sbin"],
-       cwd => '/home/ubuntu/includeos-tools/puppet/httperf-master/build',
-       command => 'make install',
-       provider => 'shell',
-}
-
-package { "arping" :
-        ensure => present,
-}
-
-package { "python-jsonschema" :
-        ensure => present,
-}
-
-package { "python-junit.xml" :
-        ensure => present,
-}
-
-package { "dnsmasq" :
-        ensure => present,
-}
-
-package { "python-psutil" :
-        ensure => present,
-}
-
-package { "grub2" :
-        ensure => present,
+$pip_packages = [ "wheel", "jsonschema", "conan", "psutil", "ws4py" ]
+package { $pip_packages :
+  ensure => present,
+  provider => pip3,
 }
 
 service { 'dnsmasq' :
@@ -112,9 +33,23 @@ service { 'dnsmasq' :
         require => Package['dnsmasq'],
 }
 
+# This requires the bridge to be configured
 exec { "modify-dnsmasq" :
         path => "/opt/puppetlabs/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
-        command => 'echo "interface=bridge43 \ndhcp-range=10.0.0.2,10.0.0.200,12h" >> /etc/dnsmasq.conf',
+        command => 'echo "interface=bridge43 \ndhcp-range=10.0.0.2,10.0.0.200,12h\nport=0" >> /etc/dnsmasq.conf',
         unless => 'grep -q bridge43 /etc/dnsmasq.conf',
         notify => Service['dnsmasq'],
+}
+
+# Deps that we wish to get rid of
+package { "net-tools" :
+        ensure => present,
+}
+package { "subprocess32" :
+  ensure => present,
+  provider => pip3,
+}
+# Only need python2 until memdisk.py is ported to python3
+package { "python" :
+  ensure => present,
 }
