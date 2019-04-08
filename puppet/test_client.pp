@@ -9,7 +9,7 @@ package { [ "clang-6.0", "gcc-7", "g++-multilib" ] :
 }
 
 # Test system dependencies
-package { [ "qemu-system", "lcov" ] :
+package { [ "qemu-system", "lcov", "grub2", "openjdk-8-jre-headless" ] :
   ensure => present,
 }
 
