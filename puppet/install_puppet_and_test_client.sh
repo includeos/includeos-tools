@@ -8,4 +8,4 @@ sudo apt-get update
 
 sudo apt-get -y install puppet-agent
 
-sudo puppet apply ~/includeos-tools/puppet/$FILE
+sudo /opt/puppetlabs/bin/puppet apply ~/includeos-tools/puppet/$FILE
