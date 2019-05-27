@@ -4,7 +4,7 @@ package { [ "cmake" , "make", "nasm", "libssl-dev" ] :
 }
 
 # Compilers
-package { [ "clang-6.0", "gcc-7", "g++-multilib" ] :
+package { [ "clang-6.0", "gcc-7", "g++-multilib", "c++-7-aarch64-linux-gnu" ] :
   ensure => present,
 }
 
@@ -41,15 +41,7 @@ exec { "modify-dnsmasq" :
         notify => Service['dnsmasq'],
 }
 
-# Deps that we wish to get rid of
-package { "net-tools" :
-        ensure => present,
-}
-package { "subprocess32" :
-  ensure => present,
-  provider => pip3,
-}
-# Only need python2 until memdisk.py is ported to python3
+# Only need python2 until NaCl is ported to python 3
 package { "python" :
   ensure => present,
 }
